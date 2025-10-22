@@ -1,0 +1,44 @@
+{
+  "name": "aimodels",
+  "version": "2.0.0",
+  "description": "AI模型管理云函数 - 模块化重构版本",
+  "main": "index.js",
+  "author": "AI Photography Team",
+  "license": "MIT",
+  "keywords": ["ai", "image-generation", "wechat", "cloud-function"],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "jimp": "^0.22.0",
+    "wx-server-sdk": "~2.6.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ai-photography/miniprogram.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ai-photography/miniprogram/issues"
+  },
+  "cloudfunction": {
+    "permissions": {
+      "openapi": [
+        "storage.uploadFile",
+        "storage.downloadFile",
+        "storage.deleteFile",
+        "storage.getTempFileURL"
+      ]
+    },
+    "runtime": "Nodejs16",
+    "timeout": 60
+  }
+}

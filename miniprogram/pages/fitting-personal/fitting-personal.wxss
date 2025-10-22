@@ -1,0 +1,648 @@
+/* 个人试衣间样式 - 简约白色+橘色点缀 */
+
+.page-container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 40rpx 30rpx 120rpx;
+}
+
+/* 页面标题 */
+.page-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.page-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #333;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+}
+
+/* Section */
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+  cursor: pointer;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.section-title .required {
+  color: #FF6B35;
+  margin-left: 8rpx;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 12rpx;
+  font-weight: 400;
+}
+
+.toggle-icon {
+  font-size: 24rpx;
+  color: #FF9A56;
+  margin-left: 12rpx;
+  transition: transform 0.3s;
+}
+
+.body-params-summary {
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  font-size: 28rpx;
+  color: #666;
+  border: 1rpx solid #e0e0e0;
+}
+
+/* 个人照片上传 */
+.single-image-upload {
+  width: 100%;
+  height: 400rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  border: 2rpx dashed #e0e0e0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.single-image-upload .image-item {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.single-image-upload image {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.upload-icon {
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+  color: #FF9A56;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: 300;
+}
+
+/* 身体参数 */
+.body-params {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.param-row {
+  margin-bottom: 30rpx;
+}
+
+.param-row:last-child {
+  margin-bottom: 0;
+}
+
+.param-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.radio-group {
+  display: flex;
+  gap: 40rpx;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  color: #333;
+  font-size: 28rpx;
+}
+
+.radio-item radio {
+  margin-right: 12rpx;
+}
+
+slider {
+  width: 100%;
+}
+
+/* 覆盖radio样式 */
+radio .wx-radio-input.wx-radio-input-checked {
+  background: #FF9A56;
+  border-color: #FF9A56;
+}
+
+/* 上传提示 */
+.upload-hint {
+  display: flex;
+  align-items: center;
+  background: #fff9f0;
+  border-left: 4rpx solid #FF9A56;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+  border-radius: 8rpx;
+}
+
+.hint-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.hint-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #FF6B35;
+  line-height: 1.5;
+}
+
+.skin-tone-selector {
+  display: flex;
+  gap: 20rpx;
+}
+
+.skin-tone-item {
+  flex: 1;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  border: 2rpx solid #e0e0e0;
+  text-align: center;
+  color: #666;
+  font-size: 28rpx;
+  transition: all 0.3s;
+}
+
+.skin-tone-item.active {
+  background: #fff;
+  border-color: #FF9A56;
+  color: #FF9A56;
+  transform: scale(1.05);
+}
+
+.param-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  color: #333;
+  font-size: 26rpx;
+  box-sizing: border-box;
+  border: 1rpx solid #e0e0e0;
+}
+
+/* 服装上传网格 */
+.clothing-upload-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.clothing-item {
+  width: calc((100% - 40rpx) / 3);
+  height: 220rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.clothing-item image {
+  width: 100%;
+  height: 100%;
+}
+
+.clothing-category {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 22rpx;
+  padding: 8rpx;
+  text-align: center;
+}
+
+.clothing-add-btn {
+  width: calc((100% - 40rpx) / 3);
+  height: 220rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  border: 2rpx dashed #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.add-icon {
+  font-size: 60rpx;
+  margin-bottom: 8rpx;
+  color: #FF9A56;
+}
+
+.add-text {
+  font-size: 24rpx;
+}
+
+.clothing-desc-input {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.clothing-desc-input textarea {
+  width: 100%;
+  min-height: 120rpx;
+  color: #333;
+  font-size: 26rpx;
+}
+
+/* 背景选择 */
+.background-selector {
+  display: flex;
+  gap: 20rpx;
+}
+
+.background-item {
+  flex: 1;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx 20rpx;
+  text-align: center;
+  border: 2rpx solid #e0e0e0;
+  transition: all 0.3s;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.background-item.active {
+  background: #fff;
+  border-color: #FF9A56;
+  box-shadow: 0 4rpx 16rpx rgba(255, 154, 86, 0.2);
+}
+
+.bg-icon {
+  display: block;
+  font-size: 48rpx;
+  margin-bottom: 12rpx;
+}
+
+.bg-label {
+  display: block;
+  color: #333;
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-bottom: 8rpx;
+}
+
+.bg-desc {
+  display: block;
+  color: #999;
+  font-size: 22rpx;
+}
+
+/* 生成按钮 */
+.action-section {
+  margin-top: 60rpx;
+}
+
+/* 积分说明 */
+.credit-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24rpx;
+  padding: 16rpx 24rpx;
+  background: #fff9f0;
+  border-radius: 24rpx;
+  border: 1rpx solid #ffe0cc;
+}
+
+.credit-icon {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+}
+
+.credit-text {
+  font-size: 26rpx;
+  color: #FF6B35;
+  font-weight: 500;
+}
+
+.generate-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 48rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.3);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.generate-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.generate-btn[disabled] {
+  opacity: 0.6;
+}
+
+/* 季节选择弹窗 */
+.season-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+}
+
+.season-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.season-content {
+  position: relative;
+  width: 100%;
+  max-height: 70vh;
+  background: white;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx;
+  animation: slideUp 0.3s ease;
+}
+
+.season-header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.season-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+}
+
+.season-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+  margin-top: 8rpx;
+}
+
+.season-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.season-option {
+  width: calc((100% - 20rpx) / 2);
+  padding: 30rpx 20rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  border: 3rpx solid #e0e0e0;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.season-option.selected {
+  background: #fff;
+  transform: scale(1.05);
+}
+
+.season-icon {
+  display: block;
+  font-size: 48rpx;
+  margin-bottom: 12rpx;
+}
+
+.season-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.season-check {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: #FF9A56;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+
+.season-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.season-cancel-btn,
+.season-confirm-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  border: none;
+}
+
+.season-cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.season-confirm-btn {
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+}
+
+/* 衣柜选择弹窗 */
+.wardrobe-selector-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+}
+
+.wardrobe-selector-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.wardrobe-selector-content {
+  position: relative;
+  width: 100%;
+  max-height: 70vh;
+  background: white;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx 0 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wardrobe-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40rpx 30rpx 40rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.wardrobe-selector-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.wardrobe-selector-close {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: #999;
+}
+
+.wardrobe-selector-list {
+  flex: 1;
+  padding: 20rpx;
+}
+
+.wardrobe-selector-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  transition: all 0.3s;
+}
+
+.wardrobe-selector-item:active {
+  background: #e9ecef;
+  transform: scale(0.98);
+}
+
+.wardrobe-item-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  margin-right: 24rpx;
+  background: white;
+  flex-shrink: 0;
+}
+
+.wardrobe-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.wardrobe-item-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.wardrobe-item-category {
+  font-size: 24rpx;
+  color: #999;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

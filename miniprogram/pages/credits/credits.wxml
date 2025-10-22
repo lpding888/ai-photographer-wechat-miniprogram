@@ -1,0 +1,100 @@
+<!-- 积分明细页面 -->
+<view class="credits-container">
+  <!-- 积分概览卡片 -->
+  <view class="overview-card">
+    <view class="overview-header">
+      <text class="overview-title">💎 我的积分</text>
+      <button class="info-btn" bindtap="showCreditInfo">ℹ️</button>
+    </view>
+
+    <view class="credits-display">
+      <text class="current-credits">{{userCredits}}</text>
+      <text class="credits-label">当前积分</text>
+    </view>
+
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-number">{{totalEarned}}</text>
+        <text class="stat-label">累计收入</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-number">{{totalSpent}}</text>
+        <text class="stat-label">累计支出</text>
+      </view>
+    </view>
+
+    <button class="recharge-btn" bindtap="goToRecharge">
+      <text class="btn-icon">💳</text>
+      <text>积分充值</text>
+    </button>
+  </view>
+
+  <!-- 筛选条件 -->
+  <view class="filter-section">
+    <view class="filter-tabs">
+      <view
+        class="filter-tab {{item.key === currentFilter ? 'active' : ''}}"
+        wx:for="{{filters}}"
+        wx:key="key"
+        bindtap="switchFilter"
+        data-filter="{{item.key}}"
+      >
+        <text class="filter-icon">{{item.icon}}</text>
+        <text class="filter-label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 明细列表 -->
+  <view class="records-section">
+    <view class="section-header" wx:if="{{records.length > 0}}">
+      <text class="section-title">明细记录</text>
+      <text class="record-count">共{{records.length}}条</text>
+    </view>
+
+    <view class="records-list">
+      <view
+        class="record-item"
+        wx:for="{{records}}"
+        wx:key="_id"
+      >
+        <view class="record-icon">
+          <text class="icon-emoji">{{item.type_icon}}</text>
+        </view>
+
+        <view class="record-content">
+          <view class="record-header">
+            <text class="record-type">{{item.type_text}}</text>
+            <text class="record-amount {{item.amountClass}}">
+              {{item.amount_display}}
+            </text>
+          </view>
+
+          <view class="record-details">
+            <text class="record-time">{{item.formatted_time}}</text>
+            <text class="record-description" wx:if="{{item.description}}">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && !loading}}">
+      <text class="load-more-text">下拉加载更多</text>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{loading}}">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && isEmpty}}">
+      <text class="empty-icon">📝</text>
+      <text class="empty-text">暂无积分记录</text>
+      <text class="empty-tip">完成签到或充值来获得积分吧</text>
+      <button class="empty-action" bindtap="goToRecharge">立即充值</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,14 @@
+{
+  "name": "task-processor",
+  "version": "2.0.0",
+  "description": "状态机任务处理器 - 支持长时AI任务",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "cloudbaseFunction": {
+    "timeout": 60,
+    "runtime": "Nodejs14.18",
+    "memorySize": 512
+  }
+}

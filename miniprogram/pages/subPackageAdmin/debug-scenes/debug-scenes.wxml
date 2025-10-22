@@ -1,0 +1,184 @@
+<!--场景数据调试页面-->
+<view class="debug-container">
+  <view class="debug-header">
+    <text class="debug-title">场景数据调试工具</text>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="button-group">
+    
+    <!-- AI模型管理 -->
+    <view class="section-title">AI模型管理</view>
+    <button 
+      class="debug-btn primary" 
+      bindtap="checkAIModels" 
+      disabled="{{loading}}"
+    >
+      检查AI模型数据
+    </button>
+    
+    <button 
+      class="debug-btn success" 
+      bindtap="repairAIModels" 
+      disabled="{{loading}}"
+    >
+      修复AI模型数据
+    </button>
+    
+    <!-- 提示词模板管理 -->
+    <view class="section-title">提示词模板管理</view>
+    <button 
+      class="debug-btn primary" 
+      bindtap="checkPromptTemplates" 
+      disabled="{{loading}}"
+    >
+      检查提示词模板数据
+    </button>
+    
+    <button 
+      class="debug-btn success" 
+      bindtap="repairPromptTemplates" 
+      disabled="{{loading}}"
+    >
+      修复提示词模板数据
+    </button>
+    
+    <!-- 统一检查 -->
+    <view class="section-title">统一检查</view>
+    <button 
+      class="debug-btn warning" 
+      bindtap="checkAllCollections" 
+      disabled="{{loading}}"
+    >
+      检查所有集合
+    </button>
+    
+    <!-- 场景管理 -->
+    <view class="section-title">场景管理</view>
+    <button 
+      class="debug-btn primary" 
+      bindtap="checkScenes" 
+      disabled="{{loading}}"
+    >
+      检查场景数据
+    </button>
+    
+    <button 
+      class="debug-btn success" 
+      bindtap="repairScenes" 
+      disabled="{{loading}}"
+    >
+      修复场景数据
+    </button>
+    
+    <button 
+      class="debug-btn warning" 
+      bindtap="addTestScenes" 
+      disabled="{{loading}}"
+    >
+      添加测试场景
+    </button>
+    
+    <button 
+      class="debug-btn info" 
+      bindtap="testScenesAPI" 
+      disabled="{{loading}}"
+    >
+      测试场景API
+    </button>
+  </view>
+
+  <!-- AI模型数据摘要 -->
+  <view class="data-summary" wx:if="{{aiModelsData}}">
+    <view class="summary-title">AI模型数据摘要</view>
+    <view class="summary-item">
+      <text class="label">集合存在:</text>
+      <text class="value {{aiModelsData.hasCollection ? 'success' : 'error'}}">{{aiModelsData.hasCollection ? '是' : '否'}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">总模型数:</text>
+      <text class="value">{{aiModelsData.count}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">可用模型:</text>
+      <text class="value">{{aiModelsData.activeCount}}</text>
+    </view>
+  </view>
+
+  <!-- 提示词模板数据摘要 -->
+  <view class="data-summary" wx:if="{{promptTemplatesData}}">
+    <view class="summary-title">提示词模板数据摘要</view>
+    <view class="summary-item">
+      <text class="label">集合存在:</text>
+      <text class="value {{promptTemplatesData.hasCollection ? 'success' : 'error'}}">{{promptTemplatesData.hasCollection ? '是' : '否'}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">总模板数:</text>
+      <text class="value">{{promptTemplatesData.count}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">有效模板:</text>
+      <text class="value">{{promptTemplatesData.activeCount}}</text>
+    </view>
+  </view>
+
+  <!-- 统一检查结果摘要 -->
+  <view class="data-summary" wx:if="{{allCollectionsData}}">
+    <view class="summary-title">统一检查结果</view>
+    <view class="summary-item">
+      <text class="label">检查时间:</text>
+      <text class="value">{{allCollectionsData.checkTime}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">总集合数:</text>
+      <text class="value">{{allCollectionsData.totalCollections}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">问题集合:</text>
+      <text class="value {{allCollectionsData.problematicCollections > 0 ? 'error' : 'success'}}">{{allCollectionsData.problematicCollections}}</text>
+    </view>
+  </view>
+
+  <!-- 场景数据摘要 -->
+  <view class="data-summary" wx:if="{{scenesData}}">
+    <view class="summary-title">场景数据摘要</view>
+    <view class="summary-item">
+      <text class="label">集合存在:</text>
+      <text class="value {{scenesData.hasCollection ? 'success' : 'error'}}">{{scenesData.hasCollection ? '是' : '否'}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">总场景数:</text>
+      <text class="value">{{scenesData.count}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">活跃场景:</text>
+      <text class="value">{{scenesData.activeCount}}</text>
+    </view>
+  </view>
+
+  <!-- 日志控制 -->
+  <view class="log-controls">
+    <text class="log-title">调试日志 ({{logs.length}})</text>
+    <view class="log-buttons">
+      <button class="log-btn" size="mini" bindtap="clearLogs">清空</button>
+      <button class="log-btn" size="mini" bindtap="copyLogs">复制</button>
+    </view>
+  </view>
+
+  <!-- 日志显示 -->
+  <view class="log-container">
+    <view class="log-item" wx:for="{{logs}}" wx:key="index">
+      {{item}}
+    </view>
+    <view class="log-item empty" wx:if="{{logs.length === 0}}">
+      暂无日志
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <view class="loading-content">
+      <text class="loading-text">处理中...</text>
+    </view>
+  </view>
+</view>

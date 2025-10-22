@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "个人试衣间",
+  "usingComponents": {
+    "state": "/components/state/state"
+  },
+  "enablePullDownRefresh": false
+}

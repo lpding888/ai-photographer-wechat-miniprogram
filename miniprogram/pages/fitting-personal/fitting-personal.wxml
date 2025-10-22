@@ -1,0 +1,254 @@
+<!-- 个人试衣间页面 -->
+<view class="page-container">
+  <state loading="{{loading}}" skeleton="{{true}}" variant="detail" />
+
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">👔 个人试衣间</text>
+    <text class="page-subtitle">上传照片和服装，AI为您智能试衣</text>
+  </view>
+
+  <!-- 个人照片上传 -->
+  <view class="section">
+    <view class="section-title">
+      <text>个人照片</text>
+      <text class="required">*</text>
+    </view>
+
+    <view class="single-image-upload">
+      <view wx:if="{{userPhoto}}" class="image-item">
+        <image src="{{userPhoto.url}}" mode="aspectFill" lazy-load="true" />
+        <view class="delete-btn" bindtap="deleteImage" data-type="user">×</view>
+      </view>
+
+      <view wx:else class="upload-placeholder" bindtap="chooseUserPhoto">
+        <text class="upload-icon">📷</text>
+        <text>上传个人照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 身体参数 -->
+  <view class="section">
+    <view class="section-title-wrapper" bindtap="toggleBodyParams">
+      <view class="section-title">
+        <text>身体参数</text>
+        <text class="required">*</text>
+        <text class="section-subtitle">（首次填写后保存为默认值）</text>
+      </view>
+      <text class="toggle-icon">{{bodyParamsCollapsed ? '▼' : '▲'}}</text>
+    </view>
+
+    <!-- 收起时显示摘要 -->
+    <view class="body-params-summary" wx:if="{{bodyParamsCollapsed}}" bindtap="toggleBodyParams">
+      <text>{{bodyParams.gender === 'female' ? '女' : '男'}} · {{bodyParams.age}}岁 · {{bodyParams.height}}cm · {{bodyParams.weight}}kg · {{bodyParams.skinTone === 'fair' ? '白皙' : '小麦色'}}</text>
+    </view>
+
+    <view class="body-params" wx:if="{{!bodyParamsCollapsed}}">
+      <!-- 性别 -->
+      <view class="param-row">
+        <text class="param-label">性别</text>
+        <radio-group class="radio-group" bindchange="onGenderChange">
+          <label class="radio-item">
+            <radio value="female" checked="{{bodyParams.gender === 'female'}}" />
+            <text>女</text>
+          </label>
+          <label class="radio-item">
+            <radio value="male" checked="{{bodyParams.gender === 'male'}}" />
+            <text>男</text>
+          </label>
+        </radio-group>
+      </view>
+
+      <!-- 年龄 -->
+      <view class="param-row">
+        <text class="param-label">年龄: {{bodyParams.age}}岁</text>
+        <slider min="18" max="60" value="{{bodyParams.age}}"
+                bindchange="onBodyParamChange" data-field="age"
+                activeColor="#FF9A56" backgroundColor="#e0e0e0"
+                block-size="20" show-value="{{false}}" />
+      </view>
+
+      <!-- 身高 -->
+      <view class="param-row">
+        <text class="param-label">身高: {{bodyParams.height}}cm</text>
+        <slider min="140" max="200" value="{{bodyParams.height}}"
+                bindchange="onBodyParamChange" data-field="height"
+                activeColor="#FF9A56" backgroundColor="#e0e0e0"
+                block-size="20" show-value="{{false}}" />
+      </view>
+
+      <!-- 体重 -->
+      <view class="param-row">
+        <text class="param-label">体重: {{bodyParams.weight}}kg</text>
+        <slider min="40" max="100" value="{{bodyParams.weight}}"
+                bindchange="onBodyParamChange" data-field="weight"
+                activeColor="#FF9A56" backgroundColor="#e0e0e0"
+                block-size="20" show-value="{{false}}" />
+      </view>
+
+      <!-- 肤色 -->
+      <view class="param-row">
+        <text class="param-label">肤色</text>
+        <view class="skin-tone-selector">
+          <view class="skin-tone-item {{bodyParams.skinTone === 'fair' ? 'active' : ''}}"
+                bindtap="onSkinToneChange" data-value="fair">
+            <text>白皙</text>
+          </view>
+          <view class="skin-tone-item {{bodyParams.skinTone === 'wheat' ? 'active' : ''}}"
+                bindtap="onSkinToneChange" data-value="wheat">
+            <text>小麦色</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 其他微调需求 -->
+      <view class="param-row">
+        <text class="param-label">其他微调（可选）</text>
+        <textarea class="param-textarea"
+                  placeholder="如：我需要丰满点、我需要强壮点、显瘦一些..."
+                  value="{{bodyParams.otherAdjustments}}"
+                  bindinput="onBodyParamInput"
+                  data-field="otherAdjustments"
+                  maxlength="200" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 服装搭配 -->
+  <view class="section">
+    <view class="section-title">
+      <text>服装搭配</text>
+      <text class="section-subtitle">（图片或文字描述至少一个）</text>
+    </view>
+
+    <!-- 上传提示 -->
+    <view class="upload-hint">
+      <text class="hint-icon">💡</text>
+      <text class="hint-text">可一次性上传套装（上衣、裤子、鞋子等），最多3张</text>
+    </view>
+
+    <!-- 服装图片上传（最多3张） -->
+    <view class="clothing-upload-grid">
+      <block wx:for="{{clothingImages}}" wx:key="index">
+        <view class="clothing-item">
+          <image src="{{item.url}}" mode="aspectFill" lazy-load="true" />
+          <view class="clothing-category">{{item.categoryLabel}}</view>
+          <view class="delete-btn" bindtap="deleteClothingImage" data-index="{{index}}">×</view>
+        </view>
+      </block>
+
+      <!-- 添加按钮 -->
+      <view wx:if="{{clothingImages.length < maxClothingImages}}"
+            class="clothing-add-btn"
+            bindtap="chooseClothingImage"
+            data-index="{{clothingImages.length}}">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加服装</text>
+      </view>
+    </view>
+
+    <!-- 服装文字描述 -->
+    <view class="clothing-desc-input">
+      <textarea placeholder="或输入搭配方式描述（如：T恤扎进裤子里、衬衫扣子解开两颗、外套敞开穿...）"
+                value="{{clothingDescription}}"
+                bindinput="onClothingDescInput"
+                maxlength="200"
+                auto-height />
+    </view>
+  </view>
+
+  <!-- 背景选择 -->
+  <view class="section">
+    <view class="section-title">
+      <text>背景选择</text>
+      <text class="required">*</text>
+    </view>
+
+    <view class="background-selector">
+      <view class="background-item {{background === 'white' ? 'active' : ''}}"
+            bindtap="onBackgroundChange" data-value="white">
+        <text class="bg-icon">⚪</text>
+        <text class="bg-label">纯白背景</text>
+        <text class="bg-desc">淘宝商品图风格</text>
+      </view>
+
+      <view class="background-item {{background === 'original' ? 'active' : ''}}"
+            bindtap="onBackgroundChange" data-value="original">
+        <text class="bg-icon">🏠</text>
+        <text class="bg-label">保持原背景</text>
+        <text class="bg-desc">自然试衣镜效果</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生成按钮 -->
+  <view class="action-section">
+    <!-- 积分说明 -->
+    <view class="credit-hint">
+      <text class="credit-icon">💰</text>
+      <text class="credit-text">每生成1张照片消耗1积分</text>
+    </view>
+
+    <button class="generate-btn"
+            bindtap="generatePhoto"
+            loading="{{isGenerating}}"
+            disabled="{{isGenerating}}">
+      {{isGenerating ? '生成中...' : '🎨 生成试衣照片'}}
+    </button>
+  </view>
+
+  <!-- 季节选择弹窗 -->
+  <view class="season-modal" wx:if="{{showSeasonModal}}">
+    <view class="season-mask" bindtap="closeSeasonModal"></view>
+    <view class="season-content">
+      <view class="season-header">
+        <text class="season-title">选择适合季节</text>
+        <text class="season-subtitle">可多选</text>
+      </view>
+
+      <view class="season-options">
+        <block wx:for="{{seasonOptions}}" wx:key="value">
+          <view class="season-option {{selectedSeasons.indexOf(item.value) > -1 ? 'selected' : ''}}"
+                style="border-color: {{item.color}}"
+                bindtap="toggleSeason"
+                data-season="{{item.value}}">
+            <text class="season-icon">{{item.icon}}</text>
+            <text class="season-label">{{item.label}}</text>
+            <text class="season-check" wx:if="{{selectedSeasons.indexOf(item.value) > -1}}">✓</text>
+          </view>
+        </block>
+      </view>
+
+      <view class="season-actions">
+        <button class="season-cancel-btn" bindtap="closeSeasonModal">取消</button>
+        <button class="season-confirm-btn" bindtap="confirmSeasonSelection">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 衣柜选择弹窗 -->
+  <view class="wardrobe-selector-modal" wx:if="{{showWardrobeSelector}}">
+    <view class="wardrobe-selector-mask" bindtap="closeWardrobeSelector"></view>
+    <view class="wardrobe-selector-content">
+      <view class="wardrobe-selector-header">
+        <text class="wardrobe-selector-title">👔 从衣柜选择</text>
+        <view class="wardrobe-selector-close" bindtap="closeWardrobeSelector">×</view>
+      </view>
+
+      <scroll-view class="wardrobe-selector-list" scroll-y>
+        <block wx:for="{{wardrobeList}}" wx:key="id">
+          <view class="wardrobe-selector-item" bindtap="onWardrobeSelect" data-item="{{item}}">
+            <image class="wardrobe-item-image" src="{{item.url}}" mode="aspectFill" lazy-load="true"></image>
+            <view class="wardrobe-item-info">
+              <text class="wardrobe-item-name">{{item.name}}</text>
+              <text class="wardrobe-item-category">
+                {{item.category === 'top' ? '上衣' : item.category === 'bottom' ? '下装' : item.category === 'shoes' ? '鞋子' : '其他'}}
+              </text>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+  </view>
+</view>

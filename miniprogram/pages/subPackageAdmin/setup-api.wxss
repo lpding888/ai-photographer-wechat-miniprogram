@@ -1,0 +1,64 @@
+/* pages/subPackageAdmin/setup-api/setup-api.wxss */
+.setup-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 32rpx;
+}
+
+.page-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 32rpx;
+  text-align: center;
+}
+
+.info-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.method-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.method-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.method-description {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20rpx;
+}
+
+.code-block {
+  background: #f5f7fa;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-family: 'Courier New', monospace;
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.copy-btn {
+  background: #4A90E2;
+  color: white;
+  border-radius: 8rpx;
+  padding: 12rpx 24rpx;
+  font-size: 26rpx;
+  text-align: center;
+  display: inline-block;
+}

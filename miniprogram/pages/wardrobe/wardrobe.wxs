@@ -1,0 +1,22 @@
+/**
+ * 衣柜页面工具函数
+ */
+
+/**
+ * 将分类key转换为中文名称
+ */
+var getCategoryName = function(category) {
+  var map = {
+    'top': '上装',
+    'bottom': '下装',
+    'dress': '连衣裙',
+    'shoes': '鞋子',
+    'accessory': '配饰',
+    'other': '其他'
+  }
+  return map[category] || '其他'
+}
+
+module.exports = {
+  getCategoryName: getCategoryName
+}

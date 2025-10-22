@@ -1,0 +1,225 @@
+/* 服装商业拍摄导航页样式 */
+@import "../../styles/global.wxss";
+
+.container {
+  min-height: 100vh;
+  background: #E9E3DF;
+  padding: 40rpx 30rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 60rpx;
+  padding: 40rpx 0 20rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.page-title {
+  display: block;
+  font-size: 52rpx;
+  font-weight: bold;
+  color: #000000;
+  margin-bottom: 16rpx;
+}
+
+.page-subtitle {
+  font-size: 28rpx;
+  color: #2f2f2f;
+}
+
+/* 功能卡片网格 */
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24rpx;
+  margin-bottom: 40rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.feature-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20rpx);
+  border-radius: 32rpx;
+  padding: 48rpx 36rpx;
+  box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  min-height: 200rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-card:active::before {
+  opacity: 1;
+}
+
+.card-bg {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300rpx;
+  height: 300rpx;
+  border-radius: 50%;
+  opacity: 0.1;
+  filter: blur(40rpx);
+}
+
+.card-bg-1 {
+  background: linear-gradient(135deg, #465C88 0%, #2F3E63 100%);
+}
+
+.card-bg-2 {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.card-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.card-icon {
+  display: block;
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.card-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 12rpx;
+}
+
+.card-desc {
+  display: block;
+  font-size: 26rpx;
+  color: #7f8c8d;
+  line-height: 1.5;
+}
+
+.card-arrow {
+  font-size: 48rpx;
+  color: #465C88;
+  margin-left: 20rpx;
+  transition: transform 0.3s ease;
+}
+
+.feature-card:active .card-arrow {
+  transform: translateX(8rpx);
+}
+
+/* 信息区块 */
+.info-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20rpx);
+  border-radius: 32rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+.info-card {
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.info-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 16rpx;
+}
+
+.info-desc {
+  font-size: 26rpx;
+  color: #7f8c8d;
+  line-height: 1.6;
+  margin-bottom: 8rpx;
+}
+
+/* 底部装饰 */
+.bottom-decoration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300rpx;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(70, 92, 136, 0.05);
+  filter: blur(40rpx);
+}
+
+.circle-1 {
+  width: 400rpx;
+  height: 400rpx;
+  bottom: -200rpx;
+  left: -100rpx;
+}
+
+.circle-2 {
+  width: 300rpx;
+  height: 300rpx;
+  bottom: -150rpx;
+  right: -50rpx;
+}
+
+/* 卡片悬浮动画 */
+.card-hover:active {
+  transform: translateY(-4rpx);
+  box-shadow: 0 16rpx 64rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 页面淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}

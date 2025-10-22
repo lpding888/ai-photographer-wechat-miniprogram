@@ -1,0 +1,61 @@
+{
+  "rules": [
+    {
+      "action": "edit",
+      "pattern": "**/*.js",
+      "allow": true
+    },
+    {
+      "action": "edit",
+      "pattern": "**/*.ts",
+      "pattern": "**/*.json",
+      "allow": true
+    },
+    {
+      "action": "edit",
+      "pattern": "**/*.md",
+      "allow": true
+    },
+    {
+      "action": "edit",
+      "pattern": "**/*.txt",
+      "allow": true
+    },
+    {
+      "action": "execute",
+      "pattern": "npm*",
+      "allow": true
+    },
+    {
+      "action": "execute",
+      "pattern": "git*",
+      "allow": true
+    },
+    {
+      "action": "execute",
+      "pattern": "ls*",
+      "allow": true
+    },
+    {
+      "action": "execute",
+      "pattern": "cd*",
+      "allow": true
+    },
+    {
+      "action": "execute",
+      "pattern": "pwsh*",
+      "allow": true
+    },
+    {
+      "action": "execute",
+      "pattern": "node*",
+      "allow": true
+    },
+    {
+      "action": "read",
+      "pattern": "**/*",
+      "allow": true
+    }
+  ],
+  "default": "ask"
+}

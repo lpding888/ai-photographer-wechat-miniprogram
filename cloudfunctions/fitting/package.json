@@ -1,0 +1,13 @@
+{
+  "name": "fitting",
+  "version": "1.0.0",
+  "description": "虚拟试衣云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  },
+  "cloudbaseFunction": {
+    "timeout": 30,
+    "runtime": "Nodejs14.18"
+  }
+}

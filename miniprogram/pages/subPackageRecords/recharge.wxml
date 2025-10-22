@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="header">
+    <text class="title">充值记录</text>
+  </view>
+
+  <state loading="{{loading}}" errorText="{{errorText}}" empty="{{!loading && !errorText && (!list || list.length===0)}}" bind:retry="onRetry" emptyText="暂无记录" skeleton="{{true}}" variant="list"></state>
+
+  <block wx:if="{{!loading && !errorText && list && list.length>0}}">
+    <view class="list">
+      <block wx:for="{{list}}" wx:key="id">
+        <view class="item">
+          <view class="row">
+            <text class="name">套餐</text>
+            <text class="value">{{item.packageDisplay}}</text>
+          </view>
+          <view class="row">
+            <text class="name">金额</text>
+            <text class="value">¥{{item.amount}}</text>
+          </view>
+          <view class="row">
+            <text class="name">时间</text>
+            <text class="value">{{item.time_text}}</text>
+          </view>
+          <view class="row">
+            <text class="name">状态</text>
+            <text class="value">{{item.status || '完成'}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+</view>

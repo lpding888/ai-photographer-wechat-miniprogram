@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "E:\\2.0"
+      ],
+      "description": "本地文件系统访问 - 提供快速文件操作能力"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "请在此处填入你的Brave Search API Key（可选）"
+      },
+      "description": "实时网络搜索 - 查找最新技术文档和解决方案"
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repository",
+        "E:\\2.0"
+      ],
+      "description": "Git版本控制 - 深度集成Git操作"
+    }
+  }
+}

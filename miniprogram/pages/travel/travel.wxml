@@ -1,0 +1,101 @@
+<!--全球旅行页面-->
+<view class="container page-slide-up">
+  <state loading="{{loading}}" skeleton="{{true}}" variant="detail" />
+
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">🌍 全球旅行</text>
+    <text class="page-subtitle">AI带你打卡世界各地美景</text>
+  </view>
+
+  <!-- 个人照片上传 -->
+  <view class="section">
+    <view class="section-title">
+      <text>你的照片</text>
+      <text class="required">*</text>
+      <text class="section-subtitle">（全身照效果更佳）</text>
+    </view>
+
+    <view class="single-image-upload">
+      <view wx:if="{{userPhoto}}" class="image-item">
+        <image
+          src="{{userPhoto.url}}"
+          mode="aspectFill"
+          data-url="{{userPhoto.url}}"
+          bindtap="previewImage"
+          lazy-load="true"
+        />
+        <view
+          class="delete-btn"
+          bindtap="deleteUserPhoto"
+        >
+          <text class="iconfont icon-close"></text>
+        </view>
+      </view>
+
+      <view
+        wx:else
+        class="upload-placeholder"
+        bindtap="chooseUserPhoto"
+      >
+        <text class="iconfont icon-camera"></text>
+        <text>上传你的照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 旅行目的地选择 -->
+  <view class="section">
+    <view class="section-title">
+      <text>选择目的地</text>
+      <text class="required">*</text>
+    </view>
+
+    <view class="destinations-grid">
+      <block wx:for="{{destinations}}" wx:key="id">
+        <view
+          class="destination-card {{selectedDestination === item.id ? 'selected' : ''}}"
+          bindtap="selectDestination"
+          data-id="{{item.id}}"
+        >
+          <image class="destination-image" src="{{item.image}}" mode="aspectFill" lazy-load="true"></image>
+          <view class="destination-overlay">
+            <text class="destination-name">{{item.name}}</text>
+            <text class="destination-country">{{item.country}}</text>
+          </view>
+          <view wx:if="{{selectedDestination === item.id}}" class="selected-badge">
+            <text>✓</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 自定义场景 -->
+  <view class="form-group form-group-vertical">
+    <view class="form-label">
+      <text>补充描述</text>
+      <text class="optional">（选填）</text>
+    </view>
+    <textarea
+      class="form-textarea"
+      placeholder="补充你想要的效果，如：阳光明媚、黄昏时分、雨后..."
+      value="{{customDescription}}"
+      bindinput="onDescriptionInput"
+      maxlength="200"
+      auto-height
+    />
+    <view class="textarea-counter">{{customDescription.length}}/200</view>
+  </view>
+
+  <!-- 生成按钮 -->
+  <view class="action-section">
+    <button
+      class="submit-btn primary-btn"
+      bindtap="generateTravel"
+      disabled="{{!userPhoto || !selectedDestination}}"
+    >
+      <text>开始旅行</text>
+    </button>
+  </view>
+</view>

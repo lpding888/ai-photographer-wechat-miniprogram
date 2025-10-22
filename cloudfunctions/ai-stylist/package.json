@@ -1,0 +1,9 @@
+{
+  "name": "ai-stylist",
+  "version": "1.0.0",
+  "description": "AI造型师云函数 - 基于事件类型、天气和衣柜内容生成搭配建议",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

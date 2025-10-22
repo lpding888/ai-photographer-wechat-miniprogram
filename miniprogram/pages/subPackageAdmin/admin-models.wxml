@@ -1,0 +1,318 @@
+<!--AI模型管理页面-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">AI模型管理</text>
+    <button class="add-btn" bindtap="showAddModel" wx:if="{{isAdmin}}">
+      <text class="add-icon">+</text>
+      添加模型
+    </button>
+  </view>
+
+  <!-- 权限提示 -->
+  <view class="no-permission" wx:if="{{!isAdmin}}">
+    <text class="no-permission-text">您没有管理AI模型的权限</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 模型列表 -->
+  <view class="models-list" wx:if="{{!loading && isAdmin}}">
+    <view class="model-card" wx:for="{{models}}" wx:key="_id">
+      <!-- 模型基本信息 -->
+      <view class="model-header">
+        <view class="model-info">
+          <text class="model-name">{{item.name}}</text>
+          <text class="model-provider">{{item.provider}}</text>
+        </view>
+        <view class="model-status">
+          <switch
+            class="status-switch"
+            checked="{{item.is_active}}"
+            bindchange="toggleModelStatus"
+            data-model-id="{{item._id}}"
+            data-current-status="{{item.is_active}}"
+            color="#4A90E2"
+          />
+        </view>
+      </view>
+
+      <!-- 模型详细信息 -->
+      <view class="model-details">
+        <view class="detail-row">
+          <text class="detail-label">类型:</text>
+          <text class="detail-value">{{item.model_type}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">优先级:</text>
+          <text class="detail-value">{{item.priority}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">权重:</text>
+          <text class="detail-value">{{item.weight}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{item.pricing}}">
+          <text class="detail-label">成本:</text>
+          <text class="detail-value">${{item.pricing.cost_per_image}}/张</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="model-actions">
+        <button
+          class="action-btn test-btn"
+          bindtap="testModel"
+          data-model-id="{{item._id}}"
+          size="mini"
+        >
+          测试
+        </button>
+        <button
+          class="action-btn delete-btn"
+          bindtap="deleteModel"
+          data-model-id="{{item._id}}"
+          data-model-name="{{item.name}}"
+          size="mini"
+        >
+          删除
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && isAdmin && models.length === 0}}">
+    <text class="empty-text">暂无AI模型</text>
+    <text class="empty-desc">点击上方按钮添加新模型</text>
+  </view>
+</view>
+
+<!-- 添加模型弹窗 -->
+<view class="modal-overlay" wx:if="{{showAddModal}}" bindtap="hideAddModal">
+  <view class="modal-content" catchtap="">
+    <view class="modal-header">
+      <text class="modal-title">添加AI模型</text>
+      <text class="modal-close" bindtap="hideAddModal">×</text>
+    </view>
+
+    <!-- 步骤指示器 -->
+    <view class="step-indicator">
+      <view class="step-item {{currentStep >= 1 ? 'active' : ''}} {{currentStep > 1 ? 'completed' : ''}}">
+        <view class="step-number">1</view>
+        <text class="step-label">基本信息</text>
+      </view>
+      <view class="step-line {{currentStep > 1 ? 'active' : ''}}"></view>
+      <view class="step-item {{currentStep >= 2 ? 'active' : ''}} {{currentStep > 2 ? 'completed' : ''}}">
+        <view class="step-number">2</view>
+        <text class="step-label">API配置</text>
+      </view>
+      <view class="step-line {{currentStep > 2 ? 'active' : ''}}"></view>
+      <view class="step-item {{currentStep >= 3 ? 'active' : ''}}">
+        <view class="step-number">3</view>
+        <text class="step-label">高级设置</text>
+      </view>
+    </view>
+
+    <view class="modal-body">
+      <!-- 步骤1: 基本信息 -->
+      <view wx:if="{{currentStep === 1}}" class="step-content">
+        <!-- 模型名称 -->
+        <view class="form-group">
+          <text class="form-label">模型名称 <text class="required">*</text></text>
+          <input
+            class="form-input {{errors.name ? 'error' : ''}}"
+            placeholder="例如: DALL-E 3, Stable Diffusion XL"
+            value="{{newModel.name}}"
+            bindinput="onInputChange"
+            data-field="name"
+          />
+          <text wx:if="{{errors.name}}" class="error-text">{{errors.name}}</text>
+          <text class="help-text">为AI模型设置一个易识别的名称</text>
+        </view>
+
+        <!-- 提供商 -->
+        <view class="form-group">
+          <text class="form-label">提供商 <text class="required">*</text></text>
+          <view class="provider-grid">
+            <view
+              wx:for="{{commonProviders}}"
+              wx:key="*this"
+              class="provider-chip {{newModel.provider === item ? 'selected' : ''}}"
+              bindtap="selectProvider"
+              data-provider="{{item}}"
+            >
+              {{item}}
+            </view>
+          </view>
+          <text wx:if="{{errors.provider}}" class="error-text">{{errors.provider}}</text>
+          <text class="help-text">选择AI服务提供商</text>
+        </view>
+
+        <!-- 模型类型 -->
+        <view class="form-group">
+          <text class="form-label">模型类型</text>
+          <view class="radio-group">
+            <view
+              class="radio-item {{newModel.model_type === 'text-to-image' ? 'selected' : ''}}"
+              bindtap="selectModelType"
+              data-type="text-to-image"
+            >
+              <view class="radio-circle">
+                <view class="radio-dot" wx:if="{{newModel.model_type === 'text-to-image'}}"></view>
+              </view>
+              <text>文生图</text>
+            </view>
+            <view
+              class="radio-item {{newModel.model_type === 'image-to-image' ? 'selected' : ''}}"
+              bindtap="selectModelType"
+              data-type="image-to-image"
+            >
+              <view class="radio-circle">
+                <view class="radio-dot" wx:if="{{newModel.model_type === 'image-to-image'}}"></view>
+              </view>
+              <text>图生图</text>
+            </view>
+            <view
+              class="radio-item {{newModel.model_type === 'text-to-video' ? 'selected' : ''}}"
+              bindtap="selectModelType"
+              data-type="text-to-video"
+            >
+              <view class="radio-circle">
+                <view class="radio-dot" wx:if="{{newModel.model_type === 'text-to-video'}}"></view>
+              </view>
+              <text>文生视频</text>
+            </view>
+          </view>
+          <text class="help-text">选择模型支持的生成类型</text>
+        </view>
+      </view>
+
+      <!-- 步骤2: API配置 -->
+      <view wx:if="{{currentStep === 2}}" class="step-content">
+        <!-- API端点 -->
+        <view class="form-group">
+          <text class="form-label">API端点 <text class="required">*</text></text>
+          <input
+            class="form-input {{errors.endpoint ? 'error' : ''}}"
+            placeholder="https://api.example.com/v1/generate"
+            value="{{newModel.endpoint}}"
+            bindinput="onInputChange"
+            data-field="endpoint"
+          />
+          <text wx:if="{{errors.endpoint}}" class="error-text">{{errors.endpoint}}</text>
+          <text class="help-text">API服务的完整URL地址</text>
+        </view>
+
+        <!-- API密钥 -->
+        <view class="form-group">
+          <text class="form-label">API密钥</text>
+          <view class="password-input-wrapper">
+            <input
+              class="form-input password-input"
+              placeholder="sk-... 或 {{GEMINI_API_KEY}}"
+              value="{{newModel.api_key}}"
+              bindinput="onInputChange"
+              data-field="api_key"
+              password="{{!showPassword}}"
+            />
+            <view class="password-toggle" bindtap="togglePasswordVisibility">
+              <text>{{showPassword ? '隐藏' : '显示'}}</text>
+            </view>
+          </view>
+          <text class="help-text">可直接输入密钥或使用环境变量格式如 {{YOUR_KEY}}</text>
+        </view>
+      </view>
+
+      <!-- 步骤3: 高级设置 -->
+      <view wx:if="{{currentStep === 3}}" class="step-content">
+        <!-- 优先级 -->
+        <view class="form-group">
+          <text class="form-label">优先级</text>
+          <view class="radio-group horizontal">
+            <view
+              wx:for="{{priorityOptions}}"
+              wx:key="value"
+              class="radio-item {{newModel.priority === item.value ? 'selected' : ''}}"
+              bindtap="selectPriority"
+              data-value="{{item.value}}"
+            >
+              <view class="radio-circle">
+                <view class="radio-dot" wx:if="{{newModel.priority === item.value}}"></view>
+              </view>
+              <text>{{item.label}}</text>
+            </view>
+          </view>
+          <text class="help-text">高优先级模型将优先被选择调用</text>
+        </view>
+
+        <!-- 权重 -->
+        <view class="form-group">
+          <text class="form-label">权重</text>
+          <view class="radio-group horizontal">
+            <view
+              wx:for="{{weightOptions}}"
+              wx:key="value"
+              class="radio-item {{newModel.weight === item.value ? 'selected' : ''}}"
+              bindtap="selectWeight"
+              data-value="{{item.value}}"
+            >
+              <view class="radio-circle">
+                <view class="radio-dot" wx:if="{{newModel.weight === item.value}}"></view>
+              </view>
+              <text>{{item.label}}</text>
+            </view>
+          </view>
+          <text class="help-text">权重越高，被随机选中的概率越大</text>
+        </view>
+
+        <!-- 启用状态 -->
+        <view class="form-group form-group-switch">
+          <view class="switch-label-wrapper">
+            <text class="form-label">启用模型</text>
+            <text class="help-text">关闭后模型将不会被调用</text>
+          </view>
+          <switch
+            checked="{{newModel.is_active}}"
+            bindchange="onSwitchChange"
+            data-field="is_active"
+            color="#4A90E2"
+          />
+        </view>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button
+        wx:if="{{currentStep > 1}}"
+        class="modal-btn secondary-btn"
+        bindtap="prevStep"
+      >
+        上一步
+      </button>
+      <button
+        wx:if="{{currentStep < 3}}"
+        class="modal-btn primary-btn"
+        bindtap="nextStep"
+      >
+        下一步
+      </button>
+      <button
+        wx:if="{{currentStep === 3}}"
+        class="modal-btn cancel-btn"
+        bindtap="hideAddModal"
+      >
+        取消
+      </button>
+      <button
+        wx:if="{{currentStep === 3}}"
+        class="modal-btn confirm-btn"
+        bindtap="addNewModel"
+      >
+        完成
+      </button>
+    </view>
+  </view>
+</view>

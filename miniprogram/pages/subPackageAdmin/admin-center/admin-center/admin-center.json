@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "系统管理中心",
+  "navigationBarBackgroundColor": "#667eea",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#667eea",
+  "enablePullDownRefresh": true,
+  "onReachBottomDistance": 50
+}

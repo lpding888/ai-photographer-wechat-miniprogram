@@ -1,0 +1,502 @@
+/* 添加衣物页面样式 */
+
+.add-clothing-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fff9f0 0%, #ffffff 100%);
+  padding: 40rpx 32rpx;
+}
+
+/* ========== 步骤容器 ========== */
+.step-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
+}
+
+.step-header {
+  text-align: center;
+}
+
+.step-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.step-desc {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* ========== Step 1: 图片选择 ========== */
+.image-selector {
+  display: flex;
+  gap: 32rpx;
+  padding: 40rpx 20rpx;
+}
+
+.selector-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 20rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 154, 86, 0.15);
+  transition: all 0.3s;
+}
+
+.selector-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 16rpx rgba(255, 154, 86, 0.25);
+}
+
+.btn-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.btn-text {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.tips {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  background: #fff9f0;
+  border-radius: 16rpx;
+  border-left: 4rpx solid #FF9A56;
+  gap: 12rpx;
+}
+
+.tip-icon {
+  font-size: 32rpx;
+}
+
+.tip-text {
+  font-size: 24rpx;
+  color: #FF9A56;
+}
+
+/* ========== Step 2: AI处理 ========== */
+.process-preview {
+  position: relative;
+  width: 100%;
+  height: 600rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+}
+
+.magic-circle {
+  position: relative;
+  width: 120rpx;
+  height: 120rpx;
+}
+
+.circle-1, .circle-2, .circle-3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4rpx solid transparent;
+  border-top-color: #FF9A56;
+  animation: spin 1.5s linear infinite;
+}
+
+.circle-2 {
+  border-top-color: #FFB84D;
+  animation-delay: 0.3s;
+  animation-duration: 1.2s;
+}
+
+.circle-3 {
+  border-top-color: #FFD666;
+  animation-delay: 0.6s;
+  animation-duration: 0.9s;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #FF9A56;
+  font-weight: 600;
+}
+
+/* 处理结果对比 */
+.result-compare {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 40rpx;
+  gap: 20rpx;
+}
+
+.compare-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.compare-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.compare-image {
+  width: 100%;
+  height: 300rpx;
+  border-radius: 16rpx;
+  object-fit: contain;
+  background: #f8f9fa;
+}
+
+.compare-arrow {
+  font-size: 48rpx;
+  color: #FF9A56;
+  font-weight: bold;
+}
+
+/* 步骤操作按钮 */
+.step-actions {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 0;
+}
+
+.btn-secondary, .btn-primary {
+  flex: 1;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s;
+}
+
+.btn-secondary {
+  background: #f8f9fa;
+  color: #666;
+}
+
+.btn-secondary:active {
+  background: #e9ecef;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(255, 154, 86, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 16rpx rgba(255, 154, 86, 0.4);
+}
+
+/* ========== Step 3: 信息补充 ========== */
+.result-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.result-image {
+  width: 100%;
+  max-height: 400rpx;
+  object-fit: contain;
+}
+
+.info-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.form-hint {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 8rpx;
+}
+
+.form-input {
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+  border: 2rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  background: #fff;
+  border-color: #FF9A56;
+}
+
+/* 分类按钮 */
+.category-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.category-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  border-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(255, 154, 86, 0.3);
+}
+
+.category-btn .btn-icon {
+  font-size: 40rpx;
+  margin-bottom: 8rpx;
+}
+
+.category-btn .btn-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.category-btn.active .btn-text {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 标签容器 */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 20rpx;
+  background: #f8f9fa;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+  border: 2rpx solid transparent;
+  transition: all 0.3s;
+  gap: 8rpx;
+}
+
+.tag.selected {
+  background: #fff9f0;
+  color: #FF9A56;
+  border-color: #FF9A56;
+}
+
+.tag-close {
+  font-size: 28rpx;
+  font-weight: 300;
+}
+
+/* 保存按钮 */
+.save-button-container {
+  padding: 20rpx 0;
+}
+
+.btn-save {
+  width: 100%;
+  padding: 32rpx;
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+  border-radius: 24rpx;
+  font-size: 36rpx;
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 12rpx 32rpx rgba(255, 154, 86, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  transition: all 0.3s;
+}
+
+.btn-save:active {
+  transform: scale(0.98);
+  box-shadow: 0 8rpx 24rpx rgba(255, 154, 86, 0.5);
+}
+
+.save-icon {
+  font-size: 40rpx;
+}
+
+/* ========== 成功动画 ========== */
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.success-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.success-icon {
+  font-size: 120rpx;
+  animation: bounceIn 0.6s;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.success-text {
+  font-size: 40rpx;
+  color: #fff;
+  font-weight: bold;
+  animation: slideUp 0.5s;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 烟花效果 */
+.firework {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  background: #FFD666;
+  border-radius: 50%;
+  animation: firework 1.5s ease-out;
+}
+
+.firework-1 {
+  top: 30%;
+  left: 20%;
+}
+
+.firework-2 {
+  top: 40%;
+  right: 20%;
+  animation-delay: 0.3s;
+}
+
+.firework-3 {
+  bottom: 30%;
+  left: 50%;
+  animation-delay: 0.6s;
+}
+
+@keyframes firework {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(15);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(30);
+    opacity: 0;
+  }
+}

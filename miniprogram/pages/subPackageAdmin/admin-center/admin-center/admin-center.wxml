@@ -1,0 +1,753 @@
+<!--管理中心页面-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">🛠️ 系统管理中心</text>
+    <text class="subtitle">AI模型 · 提示词 · 场景 · 套餐 · 用户 · 统计</text>
+  </view>
+
+  <!-- 标签页导航 -->
+  <view class="tab-bar">
+    <view 
+      class="tab-item {{currentTab === 0 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="0"
+    >
+      <text class="tab-icon">🤖</text>
+      <text class="tab-text">AI模型</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 1 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="1"
+    >
+      <text class="tab-icon">💡</text>
+      <text class="tab-text">提示词</text>
+    </view>
+    <view
+      class="tab-item {{currentTab === 2 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="2"
+    >
+      <text class="tab-icon">🎬</text>
+      <text class="tab-text">场景</text>
+    </view>
+    <view
+      class="tab-item {{currentTab === 3 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="3"
+    >
+      <text class="tab-icon">💰</text>
+      <text class="tab-text">套餐</text>
+    </view>
+    <view
+      class="tab-item {{currentTab === 4 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="4"
+    >
+      <text class="tab-icon">👥</text>
+      <text class="tab-text">用户</text>
+    </view>
+    <view
+      class="tab-item {{currentTab === 5 ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-index="5"
+    >
+      <text class="tab-icon">📊</text>
+      <text class="tab-text">统计</text>
+    </view>
+  </view>
+
+  <!-- AI模型管理 -->
+  <view class="tab-content" wx:if="{{currentTab === 0}}">
+    <view class="section-header">
+      <text class="section-title">AI模型管理</text>
+      <button class="add-btn" bindtap="showAddModelDialog">
+        <text class="btn-icon">➕</text>
+        <text>添加模型</text>
+      </button>
+    </view>
+
+    <view class="model-list">
+      <view 
+        class="model-item {{item.status === 'active' ? 'active' : 'inactive'}}"
+        wx:for="{{aiModels}}" 
+        wx:key="id"
+      >
+        <view class="model-info">
+          <view class="model-header">
+            <text class="model-name">{{item.name}}</text>
+            <view class="model-status {{item.status}}">
+              {{item.status === 'active' ? '✅ 启用' : '❌ 禁用'}}
+            </view>
+          </view>
+          <text class="model-desc">{{item.description}}</text>
+          <view class="model-meta">
+            <text class="meta-item">类型: {{item.type}}</text>
+            <text class="meta-item">权重: {{item.weight}}</text>
+            <text class="meta-item">优先级: {{item.priority}}</text>
+          </view>
+        </view>
+        <view class="model-actions">
+          <button class="action-btn edit" bindtap="editModel" data-model="{{item}}">编辑</button>
+          <button 
+            class="action-btn toggle"
+            bindtap="toggleModelStatus" 
+            data-id="{{item._id}}"
+            data-status="{{item.status}}"
+          >
+            {{item.status === 'active' ? '禁用' : '启用'}}
+          </button>
+          <button class="action-btn delete" bindtap="deleteModel" data-id="{{item._id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提示词管理 -->
+  <view class="tab-content" wx:if="{{currentTab === 1}}">
+    <view class="section-header">
+      <text class="section-title">提示词模板管理</text>
+      <button class="add-btn" bindtap="showAddPromptDialog">
+        <text class="btn-icon">➕</text>
+        <text>添加模板</text>
+      </button>
+    </view>
+
+    <view class="prompt-list">
+      <view class="prompt-item" wx:for="{{promptTemplates}}" wx:key="_id">
+        <view class="prompt-info">
+          <view class="prompt-header">
+            <text class="prompt-name">{{item.name}}</text>
+            <view class="prompt-category">{{item.category}}</view>
+          </view>
+          <text class="prompt-desc">{{item.description}}</text>
+          <view class="prompt-template">
+            <text class="template-label">模板:</text>
+            <text class="template-content">{{item.template}}</text>
+          </view>
+          <view class="prompt-variables" wx:if="{{item.variablesText && item.variablesText.length > 0}}">
+            <text class="variables-label">变量:</text>
+            <text class="variables-content">{{item.variablesText}}</text>
+          </view>
+        </view>
+        <view class="prompt-actions">
+          <button class="action-btn edit" bindtap="editPrompt" data-prompt="{{item}}">编辑</button>
+          <button class="action-btn delete" bindtap="deletePrompt" data-id="{{item._id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 场景管理 -->
+  <view class="tab-content" wx:if="{{currentTab === 2}}">
+    <view class="section-header">
+      <text class="section-title">摄影场景管理</text>
+      <button class="add-btn" bindtap="showAddSceneDialog">
+        <text class="btn-icon">➕</text>
+        <text>添加场景</text>
+      </button>
+    </view>
+
+    <view class="scene-list">
+      <view 
+        class="scene-item {{item.enabled ? 'enabled' : 'disabled'}}"
+        wx:for="{{scenes}}" 
+        wx:key="id"
+      >
+        <view class="scene-info">
+          <view class="scene-header">
+            <text class="scene-name">{{item.name}}</text>
+            <view class="scene-status {{item.enabled ? 'enabled' : 'disabled'}}">
+              {{item.enabled ? '✅ 启用' : '❌ 禁用'}}
+            </view>
+          </view>
+          <text class="scene-desc">{{item.description}}</text>
+          <view class="scene-meta">
+            <text class="meta-item">分类: {{item.category}}</text>
+            <text class="meta-item">标签: {{item.tagsDisplay}}</text>
+          </view>
+        </view>
+        <view class="scene-actions">
+          <button class="action-btn edit" bindtap="editScene" data-scene="{{item}}">编辑</button>
+          <button 
+            class="action-btn toggle"
+            bindtap="toggleSceneStatus" 
+            data-id="{{item.id}}"
+            data-enabled="{{item.enabled}}"
+          >
+            {{item.enabled ? '禁用' : '启用'}}
+          </button>
+          <button class="action-btn delete" bindtap="deleteScene" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 套餐管理 -->
+  <view class="tab-content" wx:if="{{currentTab === 3}}">
+    <view class="section-header">
+      <text class="section-title">充值套餐管理</text>
+      <button class="add-btn" bindtap="showAddPackageDialog">
+        <text class="btn-icon">➕</text>
+        <text>添加套餐</text>
+      </button>
+    </view>
+
+    <view class="package-list">
+      <view
+        class="package-item {{item.is_active ? 'active' : 'inactive'}}"
+        wx:for="{{packages}}"
+        wx:key="_id"
+      >
+        <view class="package-info">
+          <view class="package-header">
+            <text class="package-name">{{item.name}}</text>
+            <view class="package-status {{item.is_active ? 'active' : 'inactive'}}">
+              {{item.is_active ? '✅ 启用' : '❌ 禁用'}}
+            </view>
+            <view class="package-popular" wx:if="{{item.is_popular}}">🔥 热门</view>
+          </view>
+          <text class="package-desc">{{item.description}}</text>
+          <view class="package-details">
+            <view class="detail-row">
+              <text class="detail-label">积分数量:</text>
+              <text class="detail-value">{{item.credits}} 张</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">售价:</text>
+              <text class="detail-value">¥{{item.price}}</text>
+            </view>
+            <view class="detail-row" wx:if="{{item.original_price && item.original_price > item.price}}">
+              <text class="detail-label">原价:</text>
+              <text class="detail-value original-price">¥{{item.original_price}}</text>
+            </view>
+            <view class="detail-row" wx:if="{{item.discount}}">
+              <text class="detail-label">优惠标签:</text>
+              <text class="detail-value discount">{{item.discount}}</text>
+            </view>
+            <view class="detail-row">
+              <text class="detail-label">排序:</text>
+              <text class="detail-value">{{item.sort_order || 1}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="package-actions">
+          <button class="action-btn edit" bindtap="editPackage" data-package="{{item}}">编辑</button>
+          <button
+            class="action-btn toggle"
+            bindtap="togglePackageStatus"
+            data-id="{{item._id || item.id}}"
+            data-status="{{item.is_active}}"
+          >
+            {{item.is_active ? '禁用' : '启用'}}
+          </button>
+          <button class="action-btn delete" bindtap="deletePackage" data-id="{{item._id || item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户管理 -->
+  <view class="tab-content" wx:if="{{currentTab === 4}}">
+    <view class="section-header">
+      <text class="section-title">用户管理</text>
+      <view class="filter-controls">
+        <input
+          class="search-input"
+          placeholder="搜索用户昵称或ID"
+          value="{{userFilter.keyword}}"
+          bindinput="onUserSearch"
+        />
+        <view class="filter-buttons">
+          <button
+            class="filter-btn {{userFilter.status === 'all' ? 'active' : ''}}"
+            bindtap="onUserFilterChange"
+            data-filter="status"
+            data-value="all"
+          >全部</button>
+          <button
+            class="filter-btn {{userFilter.status === 'active' ? 'active' : ''}}"
+            bindtap="onUserFilterChange"
+            data-filter="status"
+            data-value="active"
+          >活跃</button>
+          <button
+            class="filter-btn {{userFilter.status === 'inactive' ? 'active' : ''}}"
+            bindtap="onUserFilterChange"
+            data-filter="status"
+            data-value="inactive"
+          >禁用</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="user-list">
+      <view class="user-item" wx:for="{{users}}" wx:key="_id">
+        <view class="user-avatar">
+          <image
+            class="avatar-img"
+            src="{{item.avatar_url || '/images/default-avatar.png'}}"
+            mode="aspectFill"
+          />
+        </view>
+        <view class="user-info">
+          <view class="user-header">
+            <text class="user-name">{{item.nickname || '未设置昵称'}}</text>
+            <view class="user-status {{item.status || 'active'}}">
+              {{(item.status || 'active') === 'active' ? '✅ 正常' : '❌ 禁用'}}
+            </view>
+          </view>
+          <text class="user-id">ID: {{item._id}}</text>
+          <view class="user-meta">
+            <text class="meta-item">积分: {{item.credits || 0}}</text>
+            <text class="meta-item">作品: {{item.work_count || 0}}</text>
+            <text class="meta-item">注册: {{item.created_at || '未知'}}</text>
+          </view>
+        </view>
+        <view class="user-actions">
+          <button
+            class="action-btn toggle"
+            bindtap="toggleUserStatus"
+            data-user-id="{{item._id}}"
+            data-current-status="{{item.status || 'active'}}"
+          >
+            {{(item.status || 'active') === 'active' ? '禁用' : '启用'}}
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据统计 -->
+  <view class="tab-content" wx:if="{{currentTab === 5}}">
+    <view class="section-header">
+      <text class="section-title">数据统计</text>
+      <view class="export-controls">
+        <button class="export-btn" bindtap="exportData" data-type="users">导出用户</button>
+        <button class="export-btn" bindtap="exportData" data-type="works">导出作品</button>
+        <button class="export-btn" bindtap="exportData" data-type="orders">导出订单</button>
+      </view>
+    </view>
+
+    <view class="statistics-grid">
+      <view class="stat-card">
+        <view class="stat-icon">👥</view>
+        <view class="stat-content">
+          <text class="stat-number">{{statistics.totalUsers}}</text>
+          <text class="stat-label">总用户数</text>
+        </view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-icon">🟢</view>
+        <view class="stat-content">
+          <text class="stat-number">{{statistics.activeUsers}}</text>
+          <text class="stat-label">活跃用户</text>
+        </view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-icon">🎨</view>
+        <view class="stat-content">
+          <text class="stat-number">{{statistics.totalWorks}}</text>
+          <text class="stat-label">总作品数</text>
+        </view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-icon">📈</view>
+        <view class="stat-content">
+          <text class="stat-number">{{statistics.todayWorks}}</text>
+          <text class="stat-label">今日作品</text>
+        </view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-icon">💰</view>
+        <view class="stat-content">
+          <text class="stat-number">{{statistics.totalCredits}}</text>
+          <text class="stat-label">总积分</text>
+        </view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-icon">🆕</view>
+        <view class="stat-content">
+          <text class="stat-number">{{statistics.todayCredits}}</text>
+          <text class="stat-label">今日积分</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && isEmpty}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无数据</text>
+  </view>
+</view>
+
+<!-- AI模型添加/编辑弹窗 -->
+<view class="modal-overlay" wx:if="{{showModelDialog}}" bindtap="hideModelDialog">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{editingModel ? '编辑模型' : '添加模型'}}</text>
+      <text class="modal-close" bindtap="hideModelDialog">✕</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-group">
+        <text class="form-label">模型名称 <text class="char-count">{{modelForm.name.length}}/50</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入模型名称"
+          value="{{modelForm.name}}"
+          bindinput="onModelFormInput"
+          data-field="name"
+          maxlength="50"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">模型描述 <text class="char-count">{{modelForm.description.length}}/200</text></text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入模型描述"
+          value="{{modelForm.description}}"
+          bindinput="onModelFormInput"
+          data-field="description"
+          maxlength="200"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">模型类型</text>
+        <picker 
+          bindchange="onModelTypeChange" 
+          value="{{modelTypeIndex}}" 
+          range="{{modelTypes}}"
+        >
+          <view class="picker-display">
+            {{modelTypes[modelTypeIndex] || '请选择模型类型'}}
+          </view>
+        </picker>
+      </view>
+      <view class="form-group">
+        <text class="form-label">API地址 <text class="char-count">{{modelForm.apiUrl.length}}/200</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入API地址"
+          value="{{modelForm.apiUrl}}"
+          bindinput="onModelFormInput"
+          data-field="apiUrl"
+          maxlength="200"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">API密钥 <text class="char-count">{{modelForm.apiKey.length}}/100</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入API密钥"
+          value="{{modelForm.apiKey}}"
+          bindinput="onModelFormInput"
+          data-field="apiKey"
+          password="{{!showApiKey}}"
+          maxlength="100"
+        />
+        <text class="show-password" bindtap="toggleApiKeyVisibility">
+          {{showApiKey ? '👁️' : '👁️‍🗨️'}}
+        </text>
+      </view>
+      <view class="form-group">
+        <text class="form-label">权重 (1-100)</text>
+        <slider 
+          value="{{modelForm.weight}}" 
+          min="1" 
+          max="100" 
+          bindchange="onModelWeightChange"
+          show-value
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">优先级 (1-10)</text>
+        <slider 
+          value="{{modelForm.priority}}" 
+          min="1" 
+          max="10" 
+          bindchange="onModelPriorityChange"
+          show-value
+        />
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="hideModelDialog">取消</button>
+      <button class="btn-confirm" bindtap="saveModel">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 提示词添加/编辑弹窗 -->
+<view class="modal-overlay" wx:if="{{showPromptDialog}}" bindtap="hidePromptDialog">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{editingPrompt ? '编辑提示词' : '添加提示词'}}</text>
+      <text class="modal-close" bindtap="hidePromptDialog">✕</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-group">
+        <text class="form-label">模板名称 <text class="char-count">{{promptForm.name.length}}/50</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入模板名称"
+          value="{{promptForm.name}}"
+          bindinput="onPromptFormInput"
+          data-field="name"
+          maxlength="50"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">模板描述 <text class="char-count">{{promptForm.description.length}}/200</text></text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入模板描述"
+          value="{{promptForm.description}}"
+          bindinput="onPromptFormInput"
+          data-field="description"
+          maxlength="200"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">分类 <text class="char-count">{{promptForm.category.length}}/30</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入分类（photography/fitting）"
+          value="{{promptForm.category}}"
+          bindinput="onPromptFormInput"
+          data-field="category"
+          maxlength="30"
+        />
+        <view class="category-tips">
+          <text class="tips-small">常用分类：photography（摄影）、fitting（试衣）</text>
+        </view>
+      </view>
+      <view class="form-group">
+        <text class="form-label">提示词模板 <text class="char-count">{{promptForm.template.length}}/2000</text></text>
+        <textarea 
+          class="form-textarea extra-large" 
+          placeholder="请输入提示词模板，使用 {变量名} 格式定义变量。建议使用简洁、高效的模板。"
+          value="{{promptForm.template}}"
+          bindinput="onPromptFormInput"
+          data-field="template"
+          maxlength="2000"
+        />
+        <view class="template-tips">
+          <text class="tips-title">💡 模板优化建议：</text>
+          <text class="tips-item">• 使用简洁的描述语言</text>
+          <text class="tips-item">• 重点突出核心要求</text>
+          <text class="tips-item">• 合理使用变量 {变量名}</text>
+        </view>
+      </view>
+      <view class="form-group">
+        <text class="form-label">变量列表 <text class="char-count">{{promptForm.variablesText.length}}/300</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入变量名，多个变量用逗号分隔（如：gender,age,clothing）"
+          value="{{promptForm.variablesText}}"
+          bindinput="onPromptFormInput"
+          data-field="variablesText"
+          maxlength="300"
+        />
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="hidePromptDialog">取消</button>
+      <button class="btn-confirm" bindtap="savePrompt">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 场景添加/编辑弹窗 -->
+<view class="modal-overlay" wx:if="{{showSceneDialog}}" bindtap="hideSceneDialog">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{editingScene ? '编辑场景' : '添加场景'}}</text>
+      <text class="modal-close" bindtap="hideSceneDialog">✕</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-group">
+        <text class="form-label">场景名称 <text class="char-count">{{sceneForm.name.length}}/50</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入场景名称"
+          value="{{sceneForm.name}}"
+          bindinput="onSceneFormInput"
+          data-field="name"
+          maxlength="50"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">场景描述 <text class="char-count">{{sceneForm.description.length}}/200</text></text>
+        <textarea 
+          class="form-textarea" 
+          placeholder="请输入场景描述"
+          value="{{sceneForm.description}}"
+          bindinput="onSceneFormInput"
+          data-field="description"
+          maxlength="200"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">场景分类 <text class="char-count">{{sceneForm.category.length}}/30</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入场景分类"
+          value="{{sceneForm.category}}"
+          bindinput="onSceneFormInput"
+          data-field="category"
+          maxlength="30"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">场景标签 <text class="char-count">{{sceneForm.tagsText.length}}/100</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入标签，多个标签用逗号分隔"
+          value="{{sceneForm.tagsText}}"
+          bindinput="onSceneFormInput"
+          data-field="tagsText"
+          maxlength="100"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">场景图标 <text class="char-count">{{sceneForm.icon.length}}/50</text></text>
+        <input 
+          class="form-input" 
+          placeholder="请输入场景图标（emoji或图片路径）"
+          value="{{sceneForm.icon}}"
+          bindinput="onSceneFormInput"
+          data-field="icon"
+          maxlength="50"
+        />
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="hideSceneDialog">取消</button>
+      <button class="btn-confirm" bindtap="saveScene">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 套餐添加/编辑弹窗 -->
+<view class="modal-overlay" wx:if="{{showPackageDialog}}" bindtap="hidePackageDialog">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{editingPackage ? '编辑套餐' : '添加套餐'}}</text>
+      <text class="modal-close" bindtap="hidePackageDialog">✕</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-group">
+        <text class="form-label">套餐名称 <text class="char-count">{{packageForm.name.length}}/30</text></text>
+        <input
+          class="form-input"
+          placeholder="请输入套餐名称"
+          value="{{packageForm.name}}"
+          bindinput="onPackageFormInput"
+          data-field="name"
+          maxlength="30"
+        />
+      </view>
+      <view class="form-group">
+        <text class="form-label">套餐描述 <text class="char-count">{{packageForm.description.length}}/100</text></text>
+        <textarea
+          class="form-textarea"
+          placeholder="请输入套餐描述"
+          value="{{packageForm.description}}"
+          bindinput="onPackageFormInput"
+          data-field="description"
+          maxlength="100"
+        />
+      </view>
+      <view class="form-row">
+        <view class="form-group half">
+          <text class="form-label">积分数量</text>
+          <input
+            class="form-input"
+            placeholder="25"
+            type="number"
+            value="{{packageForm.credits}}"
+            bindinput="onPackageFormInput"
+            data-field="credits"
+          />
+        </view>
+        <view class="form-group half">
+          <text class="form-label">售价 (元)</text>
+          <input
+            class="form-input"
+            placeholder="9.9"
+            type="digit"
+            value="{{packageForm.price}}"
+            bindinput="onPackageFormInput"
+            data-field="price"
+          />
+        </view>
+      </view>
+      <view class="form-row">
+        <view class="form-group half">
+          <text class="form-label">原价 (元)</text>
+          <input
+            class="form-input"
+            placeholder="12.5"
+            type="digit"
+            value="{{packageForm.originalPrice}}"
+            bindinput="onPackageFormInput"
+            data-field="originalPrice"
+          />
+        </view>
+        <view class="form-group half">
+          <text class="form-label">排序</text>
+          <input
+            class="form-input"
+            placeholder="1"
+            type="number"
+            value="{{packageForm.sortOrder}}"
+            bindinput="onPackageFormInput"
+            data-field="sortOrder"
+          />
+        </view>
+      </view>
+      <view class="form-group">
+        <text class="form-label">优惠标签 <text class="char-count">{{packageForm.discount.length}}/20</text></text>
+        <input
+          class="form-input"
+          placeholder="例如：限时8折、超值优惠"
+          value="{{packageForm.discount}}"
+          bindinput="onPackageFormInput"
+          data-field="discount"
+          maxlength="20"
+        />
+      </view>
+      <view class="form-group">
+        <view class="switch-row">
+          <text class="switch-label">设为热门套餐</text>
+          <switch
+            checked="{{packageForm.isPopular}}"
+            bindchange="onPackageToggle"
+            data-field="isPopular"
+          />
+        </view>
+      </view>
+      <view class="form-group">
+        <view class="switch-row">
+          <text class="switch-label">启用套餐</text>
+          <switch
+            checked="{{packageForm.isActive}}"
+            bindchange="onPackageToggle"
+            data-field="isActive"
+          />
+        </view>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="hidePackageDialog">取消</button>
+      <button class="btn-confirm" bindtap="savePackage">保存</button>
+    </view>
+  </view>
+</view>

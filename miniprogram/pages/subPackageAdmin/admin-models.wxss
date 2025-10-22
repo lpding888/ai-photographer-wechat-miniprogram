@@ -1,0 +1,491 @@
+/* pages/admin-models/admin-models.wxss */
+.container {
+  padding: 32rpx;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+.add-btn {
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 40rpx;
+  padding: 16rpx 32rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+}
+
+.add-icon {
+  margin-right: 8rpx;
+  font-size: 32rpx;
+}
+
+.no-permission {
+  text-align: center;
+  margin-top: 100rpx;
+  color: #999;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 100rpx;
+  color: #999;
+}
+
+.models-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.model-card {
+  background-color: white;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+.model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.model-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.model-name {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.model-provider {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.model-details {
+  padding: 24rpx 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.detail-label {
+  color: #666;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.model-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.action-btn {
+  border-radius: 32rpx;
+  font-size: 24rpx;
+}
+
+.test-btn {
+  background-color: #e9f3ff;
+  color: #4A90E2;
+}
+
+.delete-btn {
+  background-color: #fdecec;
+  color: #e74c3c;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 100rpx;
+  color: #999;
+}
+
+.empty-text {
+  font-size: 32rpx;
+}
+
+.empty-desc {
+  font-size: 28rpx;
+  margin-top: 16rpx;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  width: 96%;
+  max-width: 750rpx;
+  max-height: 90vh;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.modal-close {
+  font-size: 40rpx;
+  color: #999;
+  cursor: pointer;
+}
+
+/* 步骤指示器 */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx 20rpx;
+  background-color: #f8f9fa;
+  border-bottom: 1rpx solid #e0e0e0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  flex: 1;
+}
+
+.step-number {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.step-item.active .step-number {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.step-item.completed .step-number {
+  background-color: #52c41a;
+  color: white;
+}
+
+.step-label {
+  font-size: 22rpx;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.step-item.active .step-label {
+  color: #4A90E2;
+  font-weight: 500;
+}
+
+.step-line {
+  height: 2rpx;
+  flex: 1;
+  background-color: #e0e0e0;
+  margin: 0 12rpx;
+  margin-bottom: 28rpx;
+  transition: background-color 0.3s;
+}
+
+.step-line.active {
+  background-color: #4A90E2;
+}
+
+.modal-body {
+  padding: 48rpx 40rpx;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.step-content {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-group {
+  margin-bottom: 72rpx;
+}
+
+.form-group:last-child {
+  margin-bottom: 24rpx;
+}
+
+.form-label {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 24rpx;
+  display: block;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff4d4f;
+  margin-left: 4rpx;
+  font-size: 32rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 104rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 16rpx;
+  padding: 0 32rpx;
+  font-size: 32rpx;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #4A90E2;
+}
+
+.form-input.error {
+  border-color: #ff4d4f;
+}
+
+.error-text {
+  display: block;
+  color: #ff4d4f;
+  font-size: 26rpx;
+  margin-top: 16rpx;
+  line-height: 1.5;
+}
+
+.help-text {
+  display: block;
+  color: #999;
+  font-size: 26rpx;
+  margin-top: 16rpx;
+  line-height: 1.6;
+}
+
+/* 提供商选择网格 */
+.provider-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24rpx;
+  margin-top: 20rpx;
+}
+
+.provider-chip {
+  padding: 24rpx 40rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  color: #666;
+  background-color: white;
+  transition: all 0.3s;
+  min-width: 180rpx;
+  text-align: center;
+}
+
+.provider-chip.selected {
+  border-color: #4A90E2;
+  background-color: #e9f3ff;
+  color: #4A90E2;
+  font-weight: 500;
+}
+
+/* 单选按钮组 */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-top: 20rpx;
+}
+
+.radio-group.horizontal {
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 28rpx 32rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  color: #666;
+  background-color: white;
+  transition: all 0.3s;
+  flex: 1;
+  min-height: 100rpx;
+}
+
+.radio-item.selected {
+  border-color: #4A90E2;
+  background-color: #e9f3ff;
+  color: #4A90E2;
+}
+
+.radio-circle {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s;
+  flex-shrink: 0;
+}
+
+.radio-item.selected .radio-circle {
+  border-color: #4A90E2;
+}
+
+.radio-dot {
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background-color: #4A90E2;
+}
+
+/* 密码输入 */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  padding-right: 140rpx !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0;
+  height: 104rpx;
+  padding: 0 32rpx;
+  display: flex;
+  align-items: center;
+  color: #4A90E2;
+  font-size: 30rpx;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.form-group-switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 36rpx 32rpx;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  min-height: 104rpx;
+}
+
+.switch-label-wrapper {
+  flex: 1;
+  margin-right: 32rpx;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  padding: 32rpx 40rpx;
+  background-color: white;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 96rpx;
+  line-height: 96rpx;
+  text-align: center;
+  font-size: 34rpx;
+  border: none;
+  border-radius: 12rpx;
+  transition: all 0.3s;
+}
+
+.secondary-btn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.primary-btn {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.confirm-btn {
+  background-color: #4A90E2;
+  color: white;
+  font-weight: bold;
+}

@@ -1,0 +1,290 @@
+<!--造型回忆-->
+<view class="memories-container">
+  <!-- 顶部筛选 -->
+  <view class="filter-bar">
+    <scroll-view class="filter-scroll" scroll-x>
+      <view class="filter-list">
+        <view
+          class="filter-item {{selectedFilter === item.key ? 'active' : ''}}"
+          wx:for="{{filterOptions}}"
+          wx:key="key"
+          bindtap="onFilterChange"
+          data-filter="{{item.key}}"
+        >
+          <text>{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 时间轴列表 -->
+  <scroll-view class="timeline-scroll" scroll-y>
+    <view class="timeline-container" wx:if="{{memories.length > 0}}">
+      <view
+        class="memory-item"
+        wx:for="{{memories}}"
+        wx:key="id"
+        bindtap="onMemoryClick"
+        data-id="{{item.id}}"
+        bindlongpress="onMemoryLongPress"
+      >
+        <!-- 时间轴线 -->
+        <view class="timeline-line"></view>
+        <view class="timeline-dot"></view>
+
+        <!-- 回忆卡片 -->
+        <view class="memory-card">
+          <!-- 日期标签 -->
+          <view class="memory-date">
+            <text class="date-day">{{item.displayDay}}</text>
+            <text class="date-month">{{item.displayMonth}}</text>
+          </view>
+
+          <!-- 图片展示 -->
+          <view class="memory-images" wx:if="{{item.images && item.images.length > 0}}">
+            <image
+              class="memory-image {{item.images.length === 1 ? 'single' : ''}}"
+              wx:for="{{item.images}}"
+              wx:key="*this"
+              wx:for-item="img"
+              src="{{img}}"
+              mode="{{item.images.length === 1 ? 'aspectFill' : 'aspectFill'}}"
+              bindtap="onImageClick"
+              data-images="{{item.images}}"
+              data-index="{{index}}"
+              catchtap="stopPropagation"
+            ></image>
+          </view>
+
+          <!-- 回忆内容 -->
+          <view class="memory-content">
+            <!-- 标题 -->
+            <view class="memory-title" wx:if="{{item.title}}">{{item.title}}</view>
+
+            <!-- 备注 -->
+            <view class="memory-note" wx:if="{{item.note}}">{{item.note}}</view>
+
+            <!-- 心情 -->
+            <view class="memory-mood" wx:if="{{item.mood}}">
+              <text class="mood-icon">{{item.moodIcon}}</text>
+              <text class="mood-text">{{item.moodText}}</text>
+            </view>
+
+            <!-- 关联的衣物 -->
+            <view class="memory-outfit" wx:if="{{item.items && item.items.length > 0}}">
+              <view class="outfit-label">穿搭</view>
+              <view class="outfit-items">
+                <image
+                  class="outfit-item"
+                  wx:for="{{item.items}}"
+                  wx:key="id"
+                  wx:for-item="outfit"
+                  src="{{outfit.processedImage || outfit.url}}"
+                  mode="aspectFit"
+                ></image>
+              </view>
+            </view>
+
+            <!-- 时间和地点 -->
+            <view class="memory-meta">
+              <text class="meta-time">{{item.displayTime}}</text>
+              <text class="meta-location" wx:if="{{item.location}}">📍 {{item.location}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{memories.length === 0 && !loading}}">
+      <view class="empty-icon">📸</view>
+      <text class="empty-title">暂无回忆</text>
+      <text class="empty-hint">记录每一次精彩时刻</text>
+    </view>
+  </scroll-view>
+
+  <!-- 悬浮添加按钮 -->
+  <view class="fab" bindtap="onAddMemory">
+    <text class="fab-icon">+</text>
+  </view>
+</view>
+
+<!-- 添加回忆弹窗 -->
+<view class="add-modal {{showAddModal ? 'show' : ''}}" catchtap="onCloseAddModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{isEditMode ? '编辑' : '添加'}}回忆</text>
+      <view class="modal-close" bindtap="onCloseAddModal">×</view>
+    </view>
+
+    <scroll-view class="modal-body" scroll-y>
+      <!-- 日期 -->
+      <view class="form-item">
+        <text class="form-label">日期</text>
+        <picker mode="date" value="{{memoryForm.date}}" bindchange="onDateChange">
+          <view class="picker-value">{{memoryForm.date}}</view>
+        </picker>
+      </view>
+
+      <!-- 时间 -->
+      <view class="form-item">
+        <text class="form-label">时间</text>
+        <picker mode="time" value="{{memoryForm.time}}" bindchange="onTimeChange">
+          <view class="picker-value">{{memoryForm.time}}</view>
+        </picker>
+      </view>
+
+      <!-- 标题 -->
+      <view class="form-item">
+        <text class="form-label">标题</text>
+        <input
+          class="form-input"
+          placeholder="给这个回忆起个标题"
+          value="{{memoryForm.title}}"
+          bindinput="onTitleInput"
+        />
+      </view>
+
+      <!-- 照片 -->
+      <view class="form-item">
+        <text class="form-label">照片</text>
+        <view class="image-uploader">
+          <view class="uploaded-images" wx:if="{{memoryForm.images.length > 0}}">
+            <view
+              class="uploaded-item"
+              wx:for="{{memoryForm.images}}"
+              wx:key="*this"
+            >
+              <image class="uploaded-image" src="{{item}}" mode="aspectFill"></image>
+              <view class="remove-btn" bindtap="onRemoveImage" data-index="{{index}}">×</view>
+            </view>
+          </view>
+          <view class="upload-btn" bindtap="onChooseImage" wx:if="{{memoryForm.images.length < 9}}">
+            <text class="upload-icon">+</text>
+            <text class="upload-text">添加照片</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 心情 -->
+      <view class="form-item">
+        <text class="form-label">心情</text>
+        <view class="mood-buttons">
+          <view
+            class="mood-btn {{memoryForm.mood === item.key ? 'active' : ''}}"
+            wx:for="{{moodOptions}}"
+            wx:key="key"
+            bindtap="onSelectMood"
+            data-mood="{{item.key}}"
+          >
+            <text class="mood-emoji">{{item.icon}}</text>
+            <text class="mood-label">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 关联衣物 -->
+      <view class="form-item">
+        <text class="form-label">穿搭记录</text>
+        <view class="outfit-selector" bindtap="onSelectOutfit">
+          <view class="selected-outfit" wx:if="{{memoryForm.items.length > 0}}">
+            <view class="outfit-previews">
+              <image
+                class="outfit-preview"
+                wx:for="{{memoryForm.items}}"
+                wx:key="id"
+                src="{{item.processedImage || item.url}}"
+                mode="aspectFit"
+              ></image>
+            </view>
+            <text class="change-text">更改</text>
+          </view>
+          <view class="no-outfit" wx:else>
+            <text class="add-icon">+</text>
+            <text>选择衣物</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 地点 -->
+      <view class="form-item">
+        <text class="form-label">地点</text>
+        <input
+          class="form-input"
+          placeholder="在哪里度过的？"
+          value="{{memoryForm.location}}"
+          bindinput="onLocationInput"
+        />
+      </view>
+
+      <!-- 备注 -->
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <textarea
+          class="form-textarea"
+          placeholder="记录当时的心情和故事..."
+          value="{{memoryForm.note}}"
+          bindinput="onNoteInput"
+          maxlength="500"
+        ></textarea>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="onCloseAddModal">取消</button>
+      <button class="btn-save" bindtap="onSaveMemory">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 衣物选择弹窗（复用） -->
+<view class="outfit-modal {{showOutfitModal ? 'show' : ''}}" catchtap="onCloseOutfitModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">选择衣物</text>
+      <view class="modal-close" bindtap="onCloseOutfitModal">×</view>
+    </view>
+
+    <!-- 分类筛选 -->
+    <scroll-view class="category-scroll" scroll-x>
+      <view class="category-list">
+        <view
+          class="category-item {{selectedCategory === item.key ? 'active' : ''}}"
+          wx:for="{{categories}}"
+          wx:key="key"
+          bindtap="onCategoryChange"
+          data-category="{{item.key}}"
+        >
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 衣物列表 -->
+    <scroll-view class="items-scroll" scroll-y>
+      <view class="items-grid">
+        <view
+          class="item-card {{item.selected ? 'selected' : ''}}"
+          wx:for="{{wardrobeItems}}"
+          wx:key="id"
+          bindtap="onToggleItem"
+          data-id="{{item.id}}"
+        >
+          <image
+            class="item-image"
+            src="{{item.processedImage || item.url}}"
+            mode="aspectFit"
+          ></image>
+          <view class="item-name">{{item.name}}</view>
+          <view class="item-check" wx:if="{{item.selected}}">✓</view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <view class="selected-count">已选择 {{selectedItemsCount}} 件</view>
+      <button class="btn-confirm" bindtap="onConfirmOutfit">确定</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "服装拍摄",
+  "usingComponents": {
+    "state": "/components/state/state"
+  }
+}

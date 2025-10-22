@@ -1,0 +1,43 @@
+<view class="container page-slide-up">
+  <view class="header">
+    <text class="title">积分充值</text>
+    <text class="subtitle">选择套餐后下单，积分实时到账</text>
+  </view>
+
+  <!-- 统一状态组件，仅用于错误态 -->
+  <state loading="{{false}}" errorText="{{errorText}}" empty="{{false}}" bind:retry="onPullDownRefresh"></state>
+
+  <view class="balance-card glass-card" wx:if="{{userInfo}}">
+    <text class="balance-label">当前积分</text>
+    <text class="balance-value">{{userInfo.credits || 0}}</text>
+  </view>
+
+  <!-- iOS支付限制提示 -->
+  <view class="ios-warning glow-warning" wx:if="{{isIOS}}">
+    <view class="warning-icon">⚠️</view>
+    <view class="warning-content">
+      <text class="warning-title">iOS支付限制</text>
+      <text class="warning-desc">由于苹果政策限制，iOS设备暂不支持充值。请使用安卓设备或联系客服。</text>
+    </view>
+  </view>
+
+  <view class="pkg-grid">
+    <block wx:for="{{packages}}" wx:key="id">
+      <view class="pkg-item card-3d card-hover" bindtap="selectPackage" data-id="{{item.id}}">
+        <view class="card-3d-inner">
+          <text class="pkg-count">{{item.count}} 张</text>
+          <text class="pkg-price">¥{{item.price}}</text>
+          <button class="btn btn-primary small btn-enhanced btn-shine" data-id="{{item.id}}" bindtap="createOrder">立即购买</button>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="records-entry">
+    <button class="btn btn-outline" bindtap="gotoRechargeRecords">查看充值记录</button>
+  </view>
+
+  <view class="empty" wx:if="{{!packages || packages.length===0}}">
+    <text>暂无可购套餐</text>
+  </view>
+</view>

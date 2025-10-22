@@ -1,0 +1,107 @@
+<!--生成进度页面-->
+<view class="container">
+  <!-- 进度指示器 -->
+  <view class="progress-section">
+    <view class="progress-circle">
+      <view class="circle-bg">
+        <view class="circle-fill" style="transform: rotate({{progress * 3.6}}deg);"></view>
+        <view class="circle-inner">
+          <text class="progress-text">{{progress}}%</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="status-info">
+      <text class="status-title">{{message}}</text>
+      <text class="status-subtitle" wx:if="{{type === 'photography'}}">AI摄影师正在为您创作专业摄影作品</text>
+      <text class="status-subtitle" wx:elif="{{type === 'fitting'}}">AI正在为您进行智能试衣</text>
+    </view>
+  </view>
+
+  <!-- 状态动画 -->
+  <view class="animation-section">
+    <view class="loading-dots" wx:if="{{status === 'pending' || status === 'processing'}}">
+      <view class="dot"></view>
+      <view class="dot"></view>
+      <view class="dot"></view>
+    </view>
+    
+    <view class="success-icon" wx:if="{{status === 'completed'}}">
+      <text class="iconfont icon-check"></text>
+    </view>
+    
+    <view class="error-icon" wx:if="{{status === 'failed'}}">
+      <text class="iconfont icon-close"></text>
+    </view>
+
+    <view class="timeout-icon" wx:if="{{status === 'timeout'}}">
+      <text class="iconfont">⏰</text>
+    </view>
+  </view>
+
+  <!-- 预计时间 -->
+  <view class="time-info" wx:if="{{status === 'pending' || status === 'processing'}}">
+    <text class="time-label">预计完成时间</text>
+    <text class="time-value">3-8分钟</text>
+    <text class="time-note">我们会通过微信消息通知您完成状态</text>
+  </view>
+
+  <!-- 完成结果 -->
+  <view class="result-section" wx:if="{{status === 'completed' && result}}">
+    <view class="result-title">生成完成！</view>
+    <view class="result-stats">
+      <text>成功生成 {{result.count || 1}} 张作品</text>
+    </view>
+    <button class="view-works-btn" bindtap="goToWorks">
+      查看作品
+    </button>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button
+      wx:if="{{status === 'pending' || status === 'processing'}}"
+      class="cancel-btn"
+      bindtap="cancelTask"
+    >
+      取消任务
+    </button>
+
+    <!-- 🔄 超时重试按钮 -->
+    <button
+      wx:if="{{status === 'timeout' && canRetry}}"
+      class="retry-btn"
+      bindtap="retryGeneration"
+      disabled="{{isRetrying}}"
+    >
+      {{isRetrying ? '重试中...' : '🔄 重新生成'}}
+    </button>
+
+    <button
+      wx:if="{{canGoBack}}"
+      class="back-btn"
+      bindtap="goBack"
+    >
+      返回
+    </button>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tips-section">
+    <view class="tips-title">温馨提示</view>
+    <view class="tips-list">
+      <view class="tip-item">
+        <text class="tip-icon">💡</text>
+        <text class="tip-text">生成过程需要3-8分钟，请耐心等待</text>
+      </view>
+      <view class="tip-item">
+        <text class="tip-icon">📱</text>
+        <text class="tip-text">您可以关闭页面，我们会通过微信消息通知您</text>
+      </view>
+      <view class="tip-item">
+        <text class="tip-icon">🎨</text>
+        <text class="tip-text">AI正在根据您的要求精心创作，请稍候</text>
+      </view>
+    </view>
+  </view>
+</view>

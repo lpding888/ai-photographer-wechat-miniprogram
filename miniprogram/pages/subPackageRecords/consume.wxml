@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="header">
+    <text class="title">消费记录</text>
+  </view>
+
+  <state loading="{{loading}}" errorText="{{errorText}}" empty="{{!loading && !errorText && (!list || list.length===0)}}" bind:retry="onRetry" emptyText="暂无记录" skeleton="{{true}}" variant="list"></state>
+
+  <block wx:if="{{!loading && !errorText && list && list.length>0}}">
+    <view class="list">
+      <block wx:for="{{list}}" wx:key="id">
+        <view class="item">
+          <view class="row">
+            <text class="name">类型</text>
+            <text class="value">{{item.type_text}}</text>
+          </view>
+          <view class="row">
+            <text class="name">张数</text>
+            <text class="value">-{{item.count}}</text>
+          </view>
+          <view class="row">
+            <text class="name">时间</text>
+            <text class="value">{{item.time_text}}</text>
+          </view>
+          <view class="row">
+            <text class="name">任务</text>
+            <text class="value">{{item.ref_id}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+</view>

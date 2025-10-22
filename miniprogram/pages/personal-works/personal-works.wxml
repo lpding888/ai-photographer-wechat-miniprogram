@@ -1,0 +1,104 @@
+<!-- 个人作品集页面 -->
+<view class="container">
+  <!-- 顶部Tab -->
+  <view class="top-tabs">
+    <view class="tab-item {{activeTab === 'mine' ? 'active' : ''}}" bindtap="switchTab" data-tab="mine">
+      <text>我的作品</text>
+    </view>
+    <view class="tab-item {{activeTab === 'discover' ? 'active' : ''}}" bindtap="switchTab" data-tab="discover">
+      <text>发现</text>
+      <text class="coming-tag">即将上线</text>
+    </view>
+  </view>
+
+  <!-- 我的作品 -->
+  <view class="content-area" wx:if="{{activeTab === 'mine'}}">
+    <!-- 分类筛选 -->
+    <scroll-view class="filter-scroll" scroll-x>
+      <view class="filter-list">
+        <view
+          class="filter-tag {{selectedFilter === item.key ? 'active' : ''}}"
+          wx:for="{{filters}}"
+          wx:key="key"
+          bindtap="selectFilter"
+          data-key="{{item.key}}">
+          {{item.label}}
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 作品瀑布流 -->
+    <view class="works-waterfall" wx:if="{{works.length > 0}}">
+      <view class="waterfall-column">
+        <view
+          class="work-card"
+          wx:for="{{leftWorks}}"
+          wx:key="id"
+          bindtap="viewWork"
+          data-id="{{item.id}}">
+          <image class="work-image" src="{{item.cover}}" mode="widthFix" lazy-load></image>
+          <view class="work-info">
+            <view class="work-tag">{{item.typeText}}</view>
+            <text class="work-title">{{item.title}}</text>
+            <view class="work-meta">
+              <text class="meta-time">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="waterfall-column">
+        <view
+          class="work-card"
+          wx:for="{{rightWorks}}"
+          wx:key="id"
+          bindtap="viewWork"
+          data-id="{{item.id}}">
+          <image class="work-image" src="{{item.cover}}" mode="widthFix" lazy-load></image>
+          <view class="work-info">
+            <view class="work-tag">{{item.typeText}}</view>
+            <text class="work-title">{{item.title}}</text>
+            <view class="work-meta">
+              <text class="meta-time">{{item.createTime}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">📸</view>
+      <text class="empty-title">暂无作品</text>
+      <text class="empty-hint">去"AI玩"生成你的第一张照片吧</text>
+      <button class="empty-btn" bindtap="goToAIPlay">开始创作</button>
+    </view>
+  </view>
+
+  <!-- 发现（社交，即将上线） -->
+  <view class="content-area" wx:if="{{activeTab === 'discover'}}">
+    <view class="coming-soon">
+      <view class="coming-icon">🚀</view>
+      <text class="coming-title">社交功能即将上线</text>
+      <text class="coming-desc">敬请期待...</text>
+      <view class="coming-features">
+        <view class="feature-item">
+          <text class="feature-icon">👥</text>
+          <text>关注好友</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">❤️</text>
+          <text>点赞互动</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">💬</text>
+          <text>评论交流</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🔥</text>
+          <text>热门推荐</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

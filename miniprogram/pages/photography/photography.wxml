@@ -1,0 +1,582 @@
+<!--服装摄影页面-->
+<view class="container page-slide-up">
+  <state loading="{{loading}}" skeleton="{{true}}" variant="detail" />
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">服装拍摄</text>
+    <text class="page-subtitle">上传衣服，AI摄影师为你拍出专业大片</text>
+  </view>
+
+  <!-- 功能入口卡片 -->
+  <view class="feature-cards">
+    <navigator url="/pages/photography/flatlay/flatlay" class="feature-card" hover-class="card-hover">
+      <view class="card-icon">📐</view>
+      <view class="card-content">
+        <text class="card-title">静态拍摄</text>
+        <text class="card-desc">平铺挂拍·智能优化·一键白底</text>
+      </view>
+      <view class="card-arrow">›</view>
+    </navigator>
+
+    <navigator url="/pages/photography/photoset/photoset" class="feature-card" hover-class="card-hover">
+      <view class="card-icon">🎬</view>
+      <view class="card-content">
+        <text class="card-title">套图生成</text>
+        <text class="card-desc">一键生成·9张套图·多角度展示</text>
+      </view>
+      <view class="card-arrow">›</view>
+    </navigator>
+  </view>
+
+  <!-- 服装图片上传 -->
+  <view class="section">
+    <view class="section-title">
+      <text>服装图片</text>
+      <text class="required">*</text>
+      <text class="section-subtitle">（最多3张）</text>
+    </view>
+    
+    <view class="image-upload-grid">
+      <block wx:for="{{clothingImages}}" wx:key="index">
+        <view class="image-item">
+          <image 
+            src="{{item.url}}" 
+            mode="aspectFill"
+            data-index="{{index}}"
+            bindtap="previewImage"
+            lazy-load="true"
+          />
+          <view 
+            class="delete-btn"
+            data-index="{{index}}"
+            bindtap="deleteClothingImage"
+          >
+            <text class="iconfont icon-close"></text>
+          </view>
+        </view>
+      </block>
+      
+      <view 
+        wx:if="{{clothingImages.length < maxClothingImages}}"
+        class="upload-btn"
+        bindtap="chooseClothingImages"
+      >
+        <text class="iconfont icon-plus"></text>
+        <text>添加图片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义场景（可选） -->
+  <view class="form-group form-group-vertical">
+    <text class="label">自定义场景</text>
+    <textarea
+      class="textarea-input"
+      placeholder="例如：户外·湖边木栈道，黄昏，氛围灯"
+      value="{{customSceneText}}"
+      bindinput="onCustomSceneInput"
+      maxlength="500"
+      show-confirm-bar="{{false}}"
+    ></textarea>
+    <text class="tip">优先使用自定义场景；留空则使用已选卡片（{{customSceneText.length || 0}}/500字）</text>
+  </view>
+
+  <!-- 模特参数 -->
+  <view class="section">
+    <view class="section-title">模特参数</view>
+    
+    <!-- 基础参数 -->
+    <view class="param-group">
+      <view class="param-group-title">基础信息</view>
+      
+      <view class="form-row">
+        <view class="form-item">
+          <text class="label">性别</text>
+          <view class="segmented">
+            <button class="seg-btn {{parameters.gender==='female'?'active':''}}" data-val="female" bindtap="onGenderSegmentTap">女性</button>
+            <button class="seg-btn {{parameters.gender==='male'?'active':''}}" data-val="male" bindtap="onGenderSegmentTap">男性</button>
+          </view>
+        </view>
+        
+        <view class="form-item">
+          <text class="label">年龄</text>
+          <view class="stepper">
+            <button class="dec" data-field="age" bindtap="onStepDec">-</button>
+            <input class="num" type="number" value="{{parameters.age}}" data-field="age" bindblur="onNumberBlur" />
+            <button class="inc" data-field="age" bindtap="onStepInc">+</button>
+          </view>
+          <text class="tip">18-60</text>
+        </view>
+      </view>
+      
+      <view class="form-row">
+        <view class="form-item">
+          <text class="label">身高 (cm)</text>
+          <view class="stepper">
+            <button class="dec" data-field="height" data-step="1" bindtap="onStepDec">-</button>
+            <input class="num" type="number" value="{{parameters.height}}" data-field="height" bindblur="onNumberBlur" />
+            <button class="inc" data-field="height" data-step="1" bindtap="onStepInc">+</button>
+          </view>
+          <text class="tip">80-200（步长1）</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 外观参数 -->
+    <view class="param-group">
+      <view class="param-group-title">外观特征</view>
+      
+      <view class="form-group">
+        <text class="label">国籍</text>
+        <view class="chips">
+          <button class="chip {{parameters.nationality==='asian'?'active':''}}" data-field="nationality" data-value="asian" bindtap="onQuickPickTap">亚洲</button>
+          <button class="chip {{parameters.nationality==='european'?'active':''}}" data-field="nationality" data-value="european" bindtap="onQuickPickTap">欧洲</button>
+          <button class="chip {{parameters.nationality==='american'?'active':''}}" data-field="nationality" data-value="american" bindtap="onQuickPickTap">美洲</button>
+        </view>
+        <picker 
+          range="{{nationalityOptions}}" 
+          range-key="label"
+          value="{{selectedNationalityIndex}}"
+          bindchange="onNationalityChange"
+        >
+          <view class="picker">
+            {{nationalityOptions[selectedNationalityIndex].label}}
+            <text class="arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+      
+      <view class="form-group">
+        <text class="label">肤色</text>
+        <view class="chips">
+          <button class="chip {{parameters.skin_tone==='fair'?'active':''}}" data-field="skin_tone" data-value="fair" bindtap="onQuickPickTap">白皙</button>
+          <button class="chip {{parameters.skin_tone==='medium'?'active':''}}" data-field="skin_tone" data-value="medium" bindtap="onQuickPickTap">中等</button>
+          <button class="chip {{parameters.skin_tone==='dark'?'active':''}}" data-field="skin_tone" data-value="dark" bindtap="onQuickPickTap">深色</button>
+        </view>
+        <picker 
+          range="{{skinToneOptions}}" 
+          range-key="label"
+          value="{{selectedSkinToneIndex}}"
+          bindchange="onSkinToneChange"
+        >
+          <view class="picker">
+            {{skinToneOptions[selectedSkinToneIndex].label}}
+            <text class="arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <!-- 高级选项 -->
+  <view class="section">
+    <view class="section-title" bindtap="toggleAdvanced">
+      <text>高级选项</text>
+      <text class="toggle-icon {{showAdvanced ? 'expanded' : ''}}">▼</text>
+    </view>
+    
+    <view class="advanced-options {{showAdvanced ? 'show' : ''}}">
+      <view class="form-group form-group-textarea">
+        <text class="label">动作类型</text>
+        <textarea 
+          placeholder="描述希望的模特动作或姿势"
+          value="{{parameters.pose_type}}"
+          data-field="pose_type"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group form-group-textarea">
+        <text class="label">衣服材质</text>
+        <textarea 
+          placeholder="描述希望的衣服材质，如棉、丝绸"
+          value="{{parameters.clothing_material}}"
+          data-field="clothing_material"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group form-group-textarea">
+        <text class="label">服装搭配</text>
+        <textarea 
+          placeholder="描述希望的服装搭配风格"
+          value="{{parameters.outfit_description}}"
+          data-field="outfit_description"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group form-group-textarea">
+        <text class="label">配饰细节</text>
+        <textarea 
+          placeholder="描述希望添加的配饰"
+          value="{{parameters.accessories_style}}"
+          data-field="accessories_style"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group form-group-textarea">
+        <text class="label">情绪氛围</text>
+        <textarea 
+          placeholder="描述希望的情绪和氛围"
+          value="{{parameters.mood_and_atmosphere}}"
+          data-field="mood_and_atmosphere"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group form-group-textarea">
+        <text class="label">光线风格</text>
+        <textarea 
+          placeholder="描述希望的光线和拍摄风格"
+          value="{{parameters.lighting_style}}"
+          data-field="lighting_style"
+          bindinput="onTextInput"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 拍摄场景 -->
+  <view class="section">
+    <view class="section-title">
+      <text>拍摄场景</text>
+      <text class="required">*</text>
+    </view>
+    
+    <view class="scene-grid">
+      <block wx:for="{{scenes}}" wx:key="_id">
+        <view 
+          class="scene-card {{selectedSceneId && selectedSceneId === (item._id || item.id) ? 'selected' : ''}}"
+          data-index="{{index}}"
+          data-url="{{item.thumbnail_url}}"
+          bindtap="selectScene"
+          bindlongpress="previewScene"
+        >
+          <image src="{{item.thumbnail_url}}" mode="aspectFill" lazy-load="true" />
+          <text class="scene-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="reset-btn" bindtap="resetForm">重置</button>
+    <button class="preset-btn" bindtap="openPresetModal">预设</button>
+    <button class="ai-btn" bindtap="openAIHelper">🤖 AI助手</button>
+    <button
+      class="generate-btn {{isGenerating ? 'loading' : ''}}"
+      bindtap="startGenerate"
+      disabled="{{isGenerating}}"
+     style="position: relative; left: 4rpx; top: -5rpx">
+      {{isGenerating ? '生成中...' : '开始生成'}}
+    </button>
+  </view>
+
+  <!-- 使用指南弹窗 -->
+  <view class="guide-modal" wx:if="{{showGuide}}">
+    <view class="guide-mask" bindtap="closeGuide"></view>
+    <view class="guide-content">
+      <view class="guide-header">
+        <text class="guide-title">📸 服装摄影使用指南</text>
+        <view class="guide-close" bindtap="closeGuide">✕</view>
+      </view>
+
+      <scroll-view class="guide-body" scroll-y>
+        <view class="guide-intro">
+          <text class="intro-text">AI服装摄影师帮您快速生成专业级商品图，无需实拍、无需棚拍，3步即可获得高品质模特展示效果</text>
+        </view>
+
+        <view class="guide-step">
+          <view class="step-number">1</view>
+          <view class="step-content">
+            <text class="step-title">准备服装素材</text>
+            <text class="step-desc">上传1-3张服装图片（平铺图、挂拍图或模特图均可）</text>
+            <view class="step-tips">
+              <text class="tip-label">拍摄建议：</text>
+              <text class="tip-text">• 使用纯色背景，确保服装主体清晰完整</text>
+              <text class="tip-text">• 光线均匀充足，避免过曝或欠曝</text>
+              <text class="tip-text">• 服装摆放平整，展示细节和版型</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guide-step">
+          <view class="step-number">2</view>
+          <view class="step-content">
+            <text class="step-title">选择拍摄场景与模特</text>
+            <text class="step-desc">根据服装风格选择匹配场景，并设定理想模特形象</text>
+            <view class="step-tips">
+              <text class="tip-label">场景搭配：</text>
+              <text class="tip-text">• 休闲装 → 街头、咖啡厅、公园等生活化场景</text>
+              <text class="tip-text">• 正装/商务装 → 办公室、现代建筑等专业场景</text>
+              <text class="tip-text">• 时尚潮流 → 工业风、艺术空间等个性场景</text>
+              <text class="tip-text">• 运动装 → 健身房、户外、运动场等活力场景</text>
+            </view>
+            <view class="step-tips">
+              <text class="tip-label">模特设置：</text>
+              <text class="tip-text">• 性别、国籍、肤色可根据目标客群调整</text>
+              <text class="tip-text">• 年龄、身高影响服装展示效果</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guide-step">
+          <view class="step-number">3</view>
+          <view class="step-content">
+            <text class="step-title">高级选项（可选）</text>
+            <text class="step-desc">精细化控制拍摄效果，提升作品专业度</text>
+            <view class="step-tips">
+              <text class="tip-text">• 服装材质：如"真丝"、"棉质"、"牛仔"等</text>
+              <text class="tip-text">• 拍摄姿势：如"自然站姿"、"行走动态"、"坐姿"</text>
+              <text class="tip-text">• 氛围感：如"阳光明媚"、"温暖柔和"、"清新自然"</text>
+              <text class="tip-text">• 灯光风格：如"自然光"、"柔光箱"、"侧光"</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guide-tips">
+          <text class="tips-title">💡 专业建议</text>
+          <text class="tips-item">• 每次生成消耗1积分，建议先用默认参数测试效果</text>
+          <text class="tips-item">• 同款服装可尝试不同场景和模特组合，获得多样化素材</text>
+          <text class="tips-item">• 生成时间约30-60秒，复杂场景可能需要更长时间</text>
+          <text class="tips-item">• 所有作品自动保存至"我的作品"，随时下载使用</text>
+          <text class="tips-item">• 如对效果不满意，可调整参数重新生成</text>
+        </view>
+      </scroll-view>
+
+      <view class="guide-footer">
+        <button class="guide-btn secondary" bindtap="closeGuide">我知道了</button>
+        <button class="guide-btn primary" bindtap="closeGuideForever">不再提示</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预设管理弹窗 -->
+  <view class="preset-modal" wx:if="{{showPresetModal}}">
+    <view class="preset-mask" bindtap="closePresetModal"></view>
+    <view class="preset-content">
+      <view class="preset-header">
+        <text class="preset-title">📋 参数预设</text>
+        <view class="preset-close" bindtap="closePresetModal">✕</view>
+      </view>
+
+      <view class="preset-body">
+        <!-- 保存当前配置 -->
+        <view class="save-preset-section">
+          <view class="save-preset-title">保存当前配置</view>
+          <view class="save-preset-input-group">
+            <input
+              class="preset-name-input"
+              placeholder="输入预设名称（如：清新日系风格）"
+              value="{{newPresetName}}"
+              bindinput="onPresetNameInput"
+              maxlength="20"
+            />
+            <button class="save-preset-btn" bindtap="saveCurrentPreset">保存</button>
+          </view>
+        </view>
+
+        <!-- 已保存的预设列表 -->
+        <view class="preset-list-section">
+          <view class="preset-list-title">我的预设 ({{presets.length}})</view>
+
+          <scroll-view class="preset-list" scroll-y wx:if="{{presets.length > 0}}">
+            <block wx:for="{{presets}}" wx:key="id">
+              <view class="preset-item">
+                <view class="preset-item-info">
+                  <text class="preset-item-name">{{item.name}}</text>
+                  <text class="preset-item-scene" wx:if="{{item.sceneName}}">场景：{{item.sceneName}}</text>
+                  <text class="preset-item-scene" wx:elif="{{item.customSceneText}}">自定义：{{item.customSceneText}}</text>
+                </view>
+                <view class="preset-item-actions">
+                  <button class="load-preset-btn" data-index="{{index}}" bindtap="loadPreset">加载</button>
+                  <button class="delete-preset-btn" data-index="{{index}}" bindtap="deletePreset">删除</button>
+                </view>
+              </view>
+            </block>
+          </scroll-view>
+
+          <view class="preset-empty" wx:else>
+            <text class="preset-empty-text">暂无预设，保存当前配置试试吧</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI助手弹窗 -->
+  <view class="ai-helper-modal" wx:if="{{showAIHelper}}">
+    <view class="ai-helper-mask" bindtap="closeAIHelper"></view>
+    <view class="ai-helper-content">
+      <view class="ai-helper-header">
+        <text class="ai-helper-title">🤖 AI摄影助手</text>
+        <view class="ai-helper-close" bindtap="closeAIHelper">✕</view>
+      </view>
+
+      <!-- Tab切换 -->
+      <view class="ai-tabs">
+        <view
+          class="ai-tab {{activeAITab === 'pose' ? 'active' : ''}}"
+          data-tab="pose"
+          bindtap="switchAITab"
+        >
+          姿势生成
+        </view>
+        <view
+          class="ai-tab {{activeAITab === 'prompt' ? 'active' : ''}}"
+          data-tab="prompt"
+          bindtap="switchAITab"
+        >
+          Prompt优化
+        </view>
+        <view
+          class="ai-tab {{activeAITab === 'scene' ? 'active' : ''}}"
+          data-tab="scene"
+          bindtap="switchAITab"
+        >
+          场景推荐
+        </view>
+      </view>
+
+      <!-- Tab内容 -->
+      <scroll-view class="ai-tab-content" scroll-y>
+        <!-- 姿势生成 -->
+        <view wx:if="{{activeAITab === 'pose'}}" class="ai-panel">
+          <view class="ai-intro">
+            <text>根据场景和服装风格，AI为您生成专业的拍摄姿势建议</text>
+          </view>
+
+          <view class="ai-param">
+            <text class="param-label">当前场景</text>
+            <text class="param-value">{{selectedScene ? selectedScene.name : (customSceneText || '未选择')}}</text>
+          </view>
+
+          <view class="ai-param">
+            <text class="param-label">服装风格</text>
+            <text class="param-value">{{parameters.outfit_description || '未描述'}}</text>
+          </view>
+
+          <button class="ai-generate-btn" bindtap="generatePoses" disabled="{{aiLoading}}">
+            {{aiLoading ? 'AI思考中...' : '生成姿势建议'}}
+          </button>
+
+          <!-- 生成的姿势列表 -->
+          <view class="ai-result" wx:if="{{aiGeneratedPoses.length > 0}}">
+            <view class="result-title">AI建议的姿势（点击使用）</view>
+            <view
+              class="pose-item"
+              wx:for="{{aiGeneratedPoses}}"
+              wx:key="index"
+              data-pose="{{item}}"
+              bindtap="selectAIPose"
+            >
+              <view class="pose-number">{{index + 1}}</view>
+              <text class="pose-text">{{item}}</text>
+              <view class="pose-check" wx:if="{{selectedAIPose === item}}">✓</view>
+            </view>
+          </view>
+
+          <!-- 姿势裂变 -->
+          <view class="ai-variation" wx:if="{{selectedAIPose}}">
+            <view class="variation-divider"></view>
+            <view class="variation-header">
+              <text class="variation-title">🎯 姿势裂变</text>
+              <text class="variation-desc">基于选中的姿势生成5个变体</text>
+            </view>
+            <button class="variation-btn" bindtap="generatePoseVariations" disabled="{{aiLoading}}">
+              {{aiLoading ? '生成中...' : '生成姿势变体'}}
+            </button>
+
+            <view class="ai-result" wx:if="{{aiPoseVariations.length > 0}}">
+              <view
+                class="pose-item variation"
+                wx:for="{{aiPoseVariations}}"
+                wx:key="index"
+                data-pose="{{item}}"
+                bindtap="selectAIPose"
+              >
+                <view class="pose-number">变{{index + 1}}</view>
+                <text class="pose-text">{{item}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- Prompt优化 -->
+        <view wx:elif="{{activeAITab === 'prompt'}}" class="ai-panel">
+          <view class="ai-intro">
+            <text>输入简单描述，AI帮您扩展为专业的摄影Prompt</text>
+          </view>
+
+          <view class="prompt-input-group">
+            <textarea
+              class="prompt-textarea"
+              placeholder="例如：站着的姿势"
+              value="{{userPromptInput}}"
+              bindinput="onPromptInput"
+              maxlength="200"
+            ></textarea>
+            <text class="prompt-count">{{userPromptInput.length}}/200</text>
+          </view>
+
+          <button class="ai-generate-btn" bindtap="optimizePrompt" disabled="{{aiLoading}}">
+            {{aiLoading ? 'AI优化中...' : '优化Prompt'}}
+          </button>
+
+          <!-- 优化结果 -->
+          <view class="ai-result" wx:if="{{optimizedPrompt}}">
+            <view class="result-title">优化后的Prompt</view>
+            <view class="optimized-prompt-box">
+              <text class="optimized-text">{{optimizedPrompt}}</text>
+            </view>
+            <button class="use-prompt-btn" bindtap="useOptimizedPrompt">使用此Prompt</button>
+          </view>
+        </view>
+
+        <!-- 场景推荐 -->
+        <view wx:elif="{{activeAITab === 'scene'}}" class="ai-panel">
+          <view class="ai-intro">
+            <text>根据服装描述，AI为您推荐最适合的拍摄场景</text>
+          </view>
+
+          <view class="ai-param">
+            <text class="param-label">服装描述</text>
+            <text class="param-value">{{parameters.outfit_description || '未描述'}}</text>
+          </view>
+
+          <view class="ai-param" wx:if="{{parameters.clothing_material}}">
+            <text class="param-label">服装材质</text>
+            <text class="param-value">{{parameters.clothing_material}}</text>
+          </view>
+
+          <button class="ai-generate-btn" bindtap="recommendScenes" disabled="{{aiLoading}}">
+            {{aiLoading ? 'AI分析中...' : '推荐场景'}}
+          </button>
+
+          <!-- 推荐结果 -->
+          <view class="ai-result" wx:if="{{aiSceneRecommendations.length > 0}}">
+            <view class="result-title">AI推荐的场景（点击应用）</view>
+            <view
+              class="scene-recommendation-item"
+              wx:for="{{aiSceneRecommendations}}"
+              wx:key="index"
+              data-scene="{{item}}"
+              bindtap="applyAIScene"
+            >
+              <view class="scene-rec-icon">{{index + 1}}</view>
+              <text class="scene-rec-text">{{item}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="ai-footer">
+        <text class="ai-tip">💡 所有AI功能不消耗积分，免费使用</text>
+      </view>
+    </view>
+  </view>
+</view>

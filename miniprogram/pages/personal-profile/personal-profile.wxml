@@ -1,0 +1,85 @@
+<!-- 个人中心页面 -->
+<view class="container">
+  <!-- 用户信息区 -->
+  <view class="user-header">
+    <view class="avatar-box">
+      <image class="avatar" src="{{userInfo.avatar_url || '/images/logo.png'}}" mode="aspectFill"></image>
+    </view>
+    <text class="username">{{userInfo.nickname || '未登录'}}</text>
+    <text class="user-id">ID: {{userInfo.user_id || 'N/A'}}</text>
+  </view>
+
+  <!-- 数据统计 -->
+  <view class="stats-card">
+    <view class="stat-item">
+      <text class="stat-number">{{stats.clothes}}</text>
+      <text class="stat-label">衣物</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-number">{{stats.works}}</text>
+      <text class="stat-label">作品</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-number">{{stats.memories}}</text>
+      <text class="stat-label">回忆</text>
+    </view>
+  </view>
+
+  <!-- 功能列表 -->
+  <view class="function-list">
+    <!-- 造型回忆 -->
+    <view class="function-card" bindtap="goToMemories">
+      <view class="card-left">
+        <view class="card-icon" style="background: linear-gradient(135deg, #FF9A56, #FF6B35);">💭</view>
+        <view class="card-info">
+          <text class="card-title">造型回忆</text>
+          <text class="card-desc">记录精彩穿搭瞬间</text>
+        </view>
+      </view>
+      <text class="card-arrow">→</text>
+    </view>
+
+    <!-- 设置 -->
+    <view class="function-card" bindtap="goToSettings">
+      <view class="card-left">
+        <view class="card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">⚙️</view>
+        <view class="card-info">
+          <text class="card-title">设置</text>
+          <text class="card-desc">个性化配置</text>
+        </view>
+      </view>
+      <text class="card-arrow">→</text>
+    </view>
+
+    <!-- 模式切换 -->
+    <view class="function-card" bindtap="switchMode">
+      <view class="card-left">
+        <view class="card-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">🔄</view>
+        <view class="card-info">
+          <text class="card-title">切换模式</text>
+          <text class="card-desc">切换到商业拍摄模式</text>
+        </view>
+      </view>
+      <text class="card-arrow">→</text>
+    </view>
+
+    <!-- 关于 -->
+    <view class="function-card" bindtap="goToAbout">
+      <view class="card-left">
+        <view class="card-icon" style="background: linear-gradient(135deg, #6dd5fa, #2980b9);">ℹ️</view>
+        <view class="card-info">
+          <text class="card-title">关于</text>
+          <text class="card-desc">版本信息</text>
+        </view>
+      </view>
+      <text class="card-arrow">→</text>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section">
+    <button class="logout-btn" bindtap="logout">退出登录</button>
+  </view>
+</view>

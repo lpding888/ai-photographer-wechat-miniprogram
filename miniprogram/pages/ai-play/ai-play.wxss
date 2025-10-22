@@ -1,0 +1,597 @@
+/* AI玩页面样式 */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fff9f0 0%, #ffffff 100%);
+  padding-bottom: 120rpx;
+}
+
+/* 顶部切换Tab */
+.top-tabs {
+  display: flex;
+  background: #fff;
+  padding: 20rpx;
+  gap: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 20rpx;
+  transition: all 0.3s;
+}
+
+.tab-item.active {
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.3);
+}
+
+.tab-icon {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
+}
+
+.tab-text {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.tab-item.active .tab-text {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 内容区域 */
+.content-area {
+  padding: 32rpx 24rpx;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.section-desc {
+  display: block;
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 上传照片区域 */
+.upload-section {
+  margin-bottom: 40rpx;
+}
+
+.upload-box {
+  height: 400rpx;
+  background: #f8f9fa;
+  border-radius: 24rpx;
+  border: 3rpx dashed #ddd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.upload-box:active {
+  background: #f0f0f0;
+  transform: scale(0.98);
+}
+
+.upload-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.upload-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.preview-box {
+  position: relative;
+  height: 400rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.user-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.change-btn {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  padding: 12rpx 24rpx;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+/* 衣物选择区域 */
+.clothes-section {
+  margin-bottom: 40rpx;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.select-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+}
+
+.btn-icon {
+  font-size: 24rpx;
+}
+
+.selected-clothes {
+  display: flex;
+  gap: 16rpx;
+  overflow-x: auto;
+  padding: 16rpx 0;
+}
+
+.clothes-item {
+  flex-shrink: 0;
+  width: 160rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clothes-img {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 16rpx;
+  background: #f8f9fa;
+  object-fit: contain;
+  margin-bottom: 12rpx;
+}
+
+.clothes-name {
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+}
+
+.empty-clothes {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 目的地选择区域 */
+.destination-section {
+  margin-bottom: 40rpx;
+}
+
+.destinations-scroll {
+  margin-top: 20rpx;
+}
+
+.destination-list {
+  display: flex;
+  gap: 20rpx;
+  padding: 16rpx 0;
+}
+
+.destination-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 280rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.destination-card:active {
+  transform: scale(0.95);
+}
+
+.destination-card.selected {
+  border: 4rpx solid #FF9A56;
+  box-shadow: 0 4rpx 20rpx rgba(255, 154, 86, 0.4);
+}
+
+.dest-img {
+  width: 100%;
+  height: 200rpx;
+  object-fit: cover;
+}
+
+.dest-info {
+  padding: 16rpx;
+  background: #fff;
+}
+
+.dest-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.dest-location {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.dest-check {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: #FF9A56;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 12rpx rgba(255, 154, 86, 0.5);
+}
+
+.more-destinations {
+  margin-top: 20rpx;
+  text-align: center;
+  padding: 20rpx;
+  color: #FF9A56;
+  font-size: 26rpx;
+}
+
+/* 操作区域 */
+.action-area {
+  margin-top: 60rpx;
+}
+
+.generate-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.4);
+  border: none;
+}
+
+.generate-btn:active {
+  transform: scale(0.98);
+}
+
+.generate-btn[disabled] {
+  opacity: 0.6;
+}
+
+/* 衣物选择弹窗 */
+.clothes-modal,
+.destinations-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  display: flex;
+  align-items: flex-end;
+}
+
+.clothes-modal.show,
+.destinations-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  width: 100%;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+}
+
+.clothes-modal.show .modal-content,
+.destinations-modal.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32rpx;
+}
+
+.clothes-grid,
+.dest-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.clothes-card,
+.dest-grid-item {
+  position: relative;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 16rpx;
+  text-align: center;
+  transition: all 0.3s;
+  border: 3rpx solid transparent;
+}
+
+.clothes-card.selected {
+  border-color: #FF9A56;
+  background: #fff9f0;
+}
+
+.card-img {
+  width: 100%;
+  height: 160rpx;
+  object-fit: contain;
+  margin-bottom: 12rpx;
+}
+
+.card-name {
+  font-size: 24rpx;
+  color: #333;
+}
+
+.card-check {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: #FF9A56;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* 目的地分类 */
+.dest-categories {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  flex-wrap: wrap;
+}
+
+.category-tag {
+  padding: 12rpx 24rpx;
+  background: #f8f9fa;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.category-tag.active {
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+}
+
+.dest-grid-img {
+  width: 100%;
+  height: 140rpx;
+  border-radius: 12rpx;
+  object-fit: cover;
+  margin-bottom: 12rpx;
+}
+
+.dest-grid-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+
+.dest-grid-location {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 32rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.selected-count {
+  flex: 1;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.confirm-btn {
+  flex: 1;
+  height: 80rpx;
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+}
+
+.confirm-btn:active {
+  transform: scale(0.98);
+}
+
+/* 造型规划入口 */
+.planner-entry {
+  padding: 20rpx 0;
+}
+
+.entry-card {
+  background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+  padding: 48rpx 40rpx;
+  border-radius: 24rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(255, 154, 86, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.entry-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 200rpx;
+  height: 200rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.card-icon-large {
+  font-size: 96rpx;
+  margin-bottom: 16rpx;
+}
+
+.entry-card .card-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.entry-card .card-desc {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 16rpx;
+}
+
+.entry-card .card-arrow {
+  position: absolute;
+  bottom: 24rpx;
+  right: 24rpx;
+  font-size: 32rpx;
+  color: #fff;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.feature-item {
+  background: #fff;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.feature-item .feature-icon {
+  font-size: 48rpx;
+}
+
+.feature-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.feature-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.feature-detail {
+  font-size: 24rpx;
+  color: #999;
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "摄影作品",
+  "usingComponents": {
+    "state": "/components/state/state"
+  }
+}

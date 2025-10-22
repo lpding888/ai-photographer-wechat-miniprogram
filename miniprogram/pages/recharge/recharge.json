@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "积分充值",
+  "usingComponents": {
+    "state": "/components/state/state"
+  }
+}

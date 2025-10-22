@@ -1,0 +1,5 @@
+{
+  "usingComponents": {
+    "state": "/components/state/state"
+  }
+}

@@ -1,0 +1,51 @@
+<!--服装商业拍摄导航页-->
+<view class="container page-fade-in">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">📸 服装商业拍摄</text>
+    <text class="page-subtitle">专业AI摄影，打造服装商业大片</text>
+  </view>
+
+  <!-- 功能卡片 -->
+  <view class="features-grid">
+    <!-- 服装拍摄 -->
+    <view class="feature-card card-hover" bindtap="goToPhotography">
+      <view class="card-bg card-bg-1"></view>
+      <view class="card-content">
+        <text class="card-icon">📸</text>
+        <text class="card-title">服装拍摄</text>
+        <text class="card-desc">上传服装平铺图，AI生成专业商业大片</text>
+      </view>
+      <view class="card-arrow">→</view>
+    </view>
+
+    <!-- 模特换装 -->
+    <view class="feature-card card-hover" bindtap="goToFitting">
+      <view class="card-bg card-bg-2"></view>
+      <view class="card-content">
+        <text class="card-icon">👗</text>
+        <text class="card-title">模特换装</text>
+        <text class="card-desc">为模特更换不同服装，展示试穿效果</text>
+      </view>
+      <view class="card-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 功能说明 -->
+  <view class="info-section">
+    <view class="info-card">
+      <text class="info-icon">💡</text>
+      <view class="info-content">
+        <text class="info-title">使用建议</text>
+        <text class="info-desc">• 服装拍摄适合平铺服装图，生成带模特的商业照</text>
+        <text class="info-desc">• 模特换装适合已有模特照片，为其更换服装</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部装饰 -->
+  <view class="bottom-decoration">
+    <view class="decoration-circle circle-1"></view>
+    <view class="decoration-circle circle-2"></view>
+  </view>
+</view>

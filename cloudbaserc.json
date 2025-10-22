@@ -1,0 +1,12 @@
+{
+  "envId": "cloudbase-0gu1afji26f514d2",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "aimodels",
+      "timeout": 60,
+      "runtime": "Nodejs16.13",
+      "installDependency": true
+    }
+  ]
+}

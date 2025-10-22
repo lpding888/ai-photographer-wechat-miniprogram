@@ -1,0 +1,13 @@
+<!-- 自定义TabBar -->
+<view class="tab-bar" style="{{isPersonalMode ? 'background: #fff' : 'background: #fff'}}">
+  <view
+    wx:for="{{list}}"
+    wx:key="index"
+    class="tab-bar-item {{selected === index ? 'active' : ''}}"
+    bindtap="switchTab"
+    data-path="{{item.pagePath}}"
+    data-index="{{index}}">
+    <text class="tab-icon">{{item.icon}}</text>
+    <text class="tab-text">{{item.text}}</text>
+  </view>
+</view>

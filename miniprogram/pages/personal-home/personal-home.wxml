@@ -1,0 +1,7 @@
+<!-- 个人模式主框架页（占位，实际由Tab切换） -->
+<view class="container">
+  <view class="welcome">
+    <text class="welcome-text">欢迎使用个人生活模式</text>
+    <text class="welcome-desc">请通过底部Tab切换功能</text>
+  </view>
+</view>

@@ -1,0 +1,56 @@
+<view class="state-wrap">
+  <block wx:if="{{loading}}">
+    <block wx:if="{{skeleton}}">
+      <!-- 骨架屏：根据 variant 渲染 -->
+      <block wx:if="{{variant === 'detail'}}">
+        <view class="skeleton-detail">
+          <view class="sk-image"></view>
+          <view class="sk-lines">
+            <view class="sk-line w60"></view>
+            <view class="sk-line w40"></view>
+            <view class="sk-line w80"></view>
+          </view>
+        </view>
+      </block>
+      <block wx:else>
+        <!-- 默认列表骨架 - 更真实的作品卡片样式 -->
+        <view class="skeleton-list">
+          <block wx:for="{{[1,2,3,4,5,6]}}" wx:key="*this">
+            <view class="sk-card">
+              <view class="sk-card-image"></view>
+              <view class="sk-card-content">
+                <view class="sk-line w80"></view>
+                <view class="sk-line w60"></view>
+                <view class="sk-line w40"></view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </block>
+    </block>
+    <block wx:else>
+      <view class="state-item">
+        <view class="spinner"></view>
+        <text class="text">加载中...</text>
+      </view>
+    </block>
+  </block>
+
+  <block wx:elif="{{errorText}}">
+    <view class="state-item">
+      <text class="icon">⚠️</text>
+      <text class="text">{{errorText}}</text>
+      <button class="btn btn-outline small" bindtap="onRetryTap">{{retryText || '重试'}}</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{empty}}">
+    <view class="state-item">
+      <text class="icon">🗂️</text>
+      <text class="text">{{emptyText || '暂无数据'}}</text>
+      <block wx:if="{{tips}}">
+        <text class="tips">{{tips}}</text>
+      </block>
+    </view>
+  </block>
+</view>

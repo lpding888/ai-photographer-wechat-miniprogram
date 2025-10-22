@@ -1,0 +1,11 @@
+# Assumption: 组织名占位符，请替换为实际 GitHub 团队/账号
+
+*                          @your-org/owners
+miniprogram/**            @your-org/frontend
+cloudfunctions/**         @your-org/cloud
+ai-photo-system/backend/** @your-org/backend
+ai-photo-system/web/**    @your-org/web
+scripts/**                @your-org/ops
+n8n-workflows/**          @your-org/ops
+docs/**                   @your-org/owners
+

@@ -1,0 +1,335 @@
+<!--造型规划器-->
+<view class="planner-container">
+  <!-- 顶部月份切换 -->
+  <view class="month-header">
+    <view class="month-nav" bindtap="onPrevMonth">
+      <text class="nav-icon">‹</text>
+    </view>
+    <view class="month-title">
+      <text class="year">{{currentYear}}年</text>
+      <text class="month">{{currentMonth}}月</text>
+    </view>
+    <view class="month-nav" bindtap="onNextMonth">
+      <text class="nav-icon">›</text>
+    </view>
+  </view>
+
+  <!-- 星期标题 -->
+  <view class="week-header">
+    <view class="week-day" wx:for="{{weekDays}}" wx:key="*this">
+      <text>{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 日历网格 -->
+  <scroll-view class="calendar-scroll" scroll-y>
+    <view class="calendar-grid">
+      <view
+        class="date-cell {{item.isToday ? 'today' : ''}} {{item.isOtherMonth ? 'other-month' : ''}} {{item.hasEvent ? 'has-event' : ''}}"
+        wx:for="{{calendarDays}}"
+        wx:key="id"
+        bindtap="onDateClick"
+        data-date="{{item.date}}"
+      >
+        <!-- 日期数字 -->
+        <view class="date-number">{{item.day}}</view>
+
+        <!-- 事件标记点 -->
+        <view class="event-dots" wx:if="{{item.hasEvent && !item.isOtherMonth}}">
+          <view class="dot" wx:for="{{item.events}}" wx:key="id" wx:for-item="evt" style="background: {{evt.color}}"></view>
+        </view>
+
+        <!-- 造型缩略图 -->
+        <view class="outfit-preview" wx:if="{{item.outfitImage && !item.isOtherMonth}}">
+          <image class="outfit-thumb" src="{{item.outfitImage}}" mode="aspectFill"></image>
+        </view>
+
+        <!-- 天气图标（未来7天） -->
+        <view class="weather-icon" wx:if="{{item.weather && !item.isOtherMonth}}">
+          <text>{{item.weather}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 事件列表 -->
+    <view class="events-section" wx:if="{{todayEvents.length > 0}}">
+      <view class="section-title">
+        <text>今日安排</text>
+      </view>
+      <view class="event-list">
+        <view
+          class="event-item"
+          wx:for="{{todayEvents}}"
+          wx:key="id"
+          bindtap="onEventClick"
+          data-id="{{item.id}}"
+        >
+          <view class="event-color" style="background: {{item.color}}"></view>
+          <view class="event-content">
+            <view class="event-title">{{item.title}}</view>
+            <view class="event-meta">
+              <text class="event-type">{{item.typeName}}</text>
+              <text class="event-time">{{item.time}}</text>
+            </view>
+          </view>
+          <view class="event-outfit" wx:if="{{item.outfitImage}}">
+            <image class="outfit-mini" src="{{item.outfitImage}}" mode="aspectFill"></image>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{todayEvents.length === 0}}">
+      <view class="empty-icon">📅</view>
+      <text class="empty-title">暂无安排</text>
+      <text class="empty-hint">点击日期创建事件规划</text>
+    </view>
+  </scroll-view>
+
+  <!-- 悬浮添加按钮 -->
+  <view class="fab" bindtap="onAddEvent">
+    <text class="fab-icon">+</text>
+  </view>
+</view>
+
+<!-- 事件规划弹窗 -->
+<view class="event-modal {{showEventModal ? 'show' : ''}}" catchtap="onCloseEventModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">{{isEditMode ? '编辑' : '创建'}}事件</text>
+      <view class="modal-close" bindtap="onCloseEventModal">×</view>
+    </view>
+
+    <view class="modal-body">
+      <!-- 日期 -->
+      <view class="form-item">
+        <text class="form-label">日期</text>
+        <picker mode="date" value="{{eventForm.date}}" bindchange="onDateChange">
+          <view class="picker-value">{{eventForm.date}}</view>
+        </picker>
+      </view>
+
+      <!-- 时间 -->
+      <view class="form-item">
+        <text class="form-label">时间</text>
+        <picker mode="time" value="{{eventForm.time}}" bindchange="onTimeChange">
+          <view class="picker-value">{{eventForm.time}}</view>
+        </picker>
+      </view>
+
+      <!-- 标题 -->
+      <view class="form-item">
+        <text class="form-label">标题</text>
+        <input
+          class="form-input"
+          placeholder="输入事件标题"
+          value="{{eventForm.title}}"
+          bindinput="onTitleInput"
+        />
+      </view>
+
+      <!-- 类型 -->
+      <view class="form-item">
+        <text class="form-label">类型</text>
+        <view class="type-buttons">
+          <view
+            class="type-btn {{eventForm.type === item.key ? 'active' : ''}}"
+            wx:for="{{eventTypes}}"
+            wx:key="key"
+            bindtap="onSelectType"
+            data-type="{{item.key}}"
+          >
+            <text class="type-icon">{{item.icon}}</text>
+            <text class="type-name">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 天气 -->
+      <view class="form-item">
+        <text class="form-label">天气</text>
+        <view class="weather-buttons">
+          <view
+            class="weather-btn {{eventForm.weather === item.key ? 'active' : ''}}"
+            wx:for="{{weatherOptions}}"
+            wx:key="key"
+            bindtap="onSelectWeather"
+            data-weather="{{item.key}}"
+          >
+            <text>{{item.icon}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 选择造型按钮 -->
+      <view class="form-item">
+        <view class="form-label-row">
+          <text class="form-label">造型搭配</text>
+          <view class="ai-suggest-btn" bindtap="onGetAISuggestion">
+            <text class="ai-icon">🤖</text>
+            <text class="ai-text">AI建议</text>
+          </view>
+        </view>
+        <view class="outfit-selector" bindtap="onSelectOutfit">
+          <view class="selected-outfit" wx:if="{{eventForm.selectedItems.length > 0}}">
+            <view class="outfit-items">
+              <image
+                class="outfit-item-img"
+                wx:for="{{eventForm.selectedItems}}"
+                wx:key="id"
+                src="{{item.processedImage || item.url}}"
+                mode="aspectFit"
+              ></image>
+            </view>
+            <text class="change-text">更改</text>
+          </view>
+          <view class="no-outfit" wx:else>
+            <text class="add-icon">+</text>
+            <text>选择衣物</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <textarea
+          class="form-textarea"
+          placeholder="添加备注信息"
+          value="{{eventForm.note}}"
+          bindinput="onNoteInput"
+          maxlength="200"
+        ></textarea>
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="onCloseEventModal">取消</button>
+      <button class="btn-save" bindtap="onSaveEvent">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 选择衣物弹窗 -->
+<view class="outfit-modal {{showOutfitModal ? 'show' : ''}}" catchtap="onCloseOutfitModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">选择衣物</text>
+      <view class="modal-close" bindtap="onCloseOutfitModal">×</view>
+    </view>
+
+    <!-- 分类筛选 -->
+    <scroll-view class="category-scroll" scroll-x>
+      <view class="category-list">
+        <view
+          class="category-item {{selectedCategory === item.key ? 'active' : ''}}"
+          wx:for="{{categories}}"
+          wx:key="key"
+          bindtap="onCategoryChange"
+          data-category="{{item.key}}"
+        >
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 衣物列表 -->
+    <scroll-view class="items-scroll" scroll-y>
+      <view class="items-grid">
+        <view
+          class="item-card {{item.selected ? 'selected' : ''}}"
+          wx:for="{{wardrobeItems}}"
+          wx:key="id"
+          bindtap="onToggleItem"
+          data-id="{{item.id}}"
+        >
+          <image
+            class="item-image"
+            src="{{item.processedImage || item.url}}"
+            mode="aspectFit"
+          ></image>
+          <view class="item-name">{{item.name}}</view>
+          <view class="item-check" wx:if="{{item.selected}}">✓</view>
+        </view>
+      </view>
+
+      <view class="empty-wardrobe" wx:if="{{wardrobeItems.length === 0}}">
+        <text class="empty-icon">👔</text>
+        <text class="empty-text">衣柜空空如也</text>
+        <text class="empty-hint">去添加衣物吧</text>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <view class="selected-count">已选择 {{selectedItemsCount}} 件</view>
+      <button class="btn-confirm" bindtap="onConfirmOutfit">确定</button>
+    </view>
+  </view>
+</view>
+
+<!-- AI建议弹窗 -->
+<view class="ai-modal {{showAIModal ? 'show' : ''}}" catchtap="onCloseAIModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">🤖 AI造型师建议</text>
+      <view class="modal-close" bindtap="onCloseAIModal">×</view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="ai-loading" wx:if="{{aiLoading}}">
+      <view class="loading-icon">🤔</view>
+      <text class="loading-text">AI正在分析您的衣柜...</text>
+      <view class="loading-spinner"></view>
+    </view>
+
+    <!-- AI建议内容 -->
+    <scroll-view class="modal-body" scroll-y wx:if="{{!aiLoading && aiSuggestion}}">
+      <!-- 风格标签 -->
+      <view class="ai-style-tag">
+        <text>{{aiSuggestion.style}}</text>
+      </view>
+
+      <!-- 建议文案 -->
+      <view class="ai-advice">
+        <text class="advice-text">{{aiSuggestion.advice}}</text>
+      </view>
+
+      <!-- 推荐衣物 -->
+      <view class="ai-recommendations" wx:if="{{aiSuggestion.recommendedItems && aiSuggestion.recommendedItems.length > 0}}">
+        <view class="recommend-title">💎 推荐搭配</view>
+        <view class="recommend-items">
+          <view
+            class="recommend-item"
+            wx:for="{{aiSuggestion.recommendedItems}}"
+            wx:key="id"
+          >
+            <image
+              class="recommend-image"
+              src="{{item.processedImage || item.url}}"
+              mode="aspectFit"
+            ></image>
+            <text class="recommend-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 原因说明 -->
+      <view class="ai-reasons" wx:if="{{aiSuggestion.reasons && aiSuggestion.reasons.length > 0}}">
+        <view class="reasons-title">✨ 推荐理由</view>
+        <view class="reasons-list">
+          <view class="reason-item" wx:for="{{aiSuggestion.reasons}}" wx:key="*this">
+            <text class="reason-dot">•</text>
+            <text class="reason-text">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer" wx:if="{{!aiLoading && aiSuggestion}}">
+      <button class="btn-cancel" bindtap="onCloseAIModal">取消</button>
+      <button class="btn-apply" bindtap="onApplyAISuggestion">采纳建议</button>
+    </view>
+  </view>
+</view>

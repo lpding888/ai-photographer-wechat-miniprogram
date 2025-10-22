@@ -1,0 +1,10 @@
+{
+  "name": "personal-worker",
+  "version": "1.0.0",
+  "description": "个人功能处理器 - 统一处理个人试衣间和全球旅行",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "axios": "^1.6.0"
+  }
+}

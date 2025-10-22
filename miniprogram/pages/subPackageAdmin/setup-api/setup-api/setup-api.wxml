@@ -1,0 +1,86 @@
+<!--pages/setup-api/setup-api.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">API配置</text>
+    <text class="subtitle">设置Gemini API模型</text>
+  </view>
+
+  <view class="content">
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="loading-section">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在配置API模型...</text>
+    </view>
+
+    <!-- 配置说明 -->
+    <view wx:else class="info-section">
+      <view class="info-card">
+        <text class="info-title">🔧 配置说明</text>
+        <text class="info-content">本页面会自动配置以下API模型：</text>
+
+        <view class="model-list">
+          <view class="model-item">
+            <text class="model-name">Gemini (OpenAI兼容格式)</text>
+            <text class="model-desc">使用OpenAI兼容的API格式</text>
+          </view>
+          <view class="model-item">
+            <text class="model-name">Gemini (Google官方格式)</text>
+            <text class="model-desc">使用Google官方API格式</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- API密钥配置方法 -->
+      <view class="config-section">
+        <text class="section-title">🔑 API密钥配置方法</text>
+
+        <view class="method-card">
+          <text class="method-title">方法1: 环境变量 (推荐)</text>
+          <view class="method-steps">
+            <text class="step">1. 在云开发控制台 > 云函数 > 环境变量 设置：</text>
+            <text class="env-var">GEMINI_OPENAI_API_KEY</text>
+            <text class="env-var">GEMINI_GOOGLE_API_KEY</text>
+            <text class="step">2. 在管理后台API密钥字段填入：</text>
+            <text class="placeholder">{{GEMINI_OPENAI_API_KEY}}</text>
+            <text class="placeholder">{{GEMINI_GOOGLE_API_KEY}}</text>
+          </view>
+        </view>
+
+        <view class="method-card">
+          <text class="method-title">方法2: 直接填入密钥</text>
+          <view class="method-steps">
+            <text class="step">直接在管理后台API密钥字段填入实际密钥值</text>
+            <text class="note">注意：直接填入的密钥会覆盖环境变量设置</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 配置结果 -->
+      <view wx:if="{{models.length > 0}}" class="result-section">
+        <text class="section-title">✅ 配置结果</text>
+        <view wx:for="{{models}}" wx:key="model_id" class="result-item">
+          <text class="result-model">{{item.model_id}}</text>
+          <text class="result-status">{{item.action === 'added' ? '新增' : '更新'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="actions">
+    <button
+      class="btn btn-primary"
+      bindtap="testApiCall"
+      disabled="{{loading}}"
+    >
+      测试API调用
+    </button>
+
+    <button
+      class="btn btn-secondary"
+      bindtap="goHome"
+    >
+      返回首页
+    </button>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "全球旅行",
+  "navigationBarBackgroundColor": "#667eea",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "state": "/components/state/state"
+  },
+  "enablePullDownRefresh": false
+}

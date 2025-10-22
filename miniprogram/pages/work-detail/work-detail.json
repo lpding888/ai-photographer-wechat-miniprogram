@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "作品查看",
+  "usingComponents": {
+    "state": "/components/state/state"
+  }
+}

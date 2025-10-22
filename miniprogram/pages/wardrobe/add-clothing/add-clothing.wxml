@@ -1,0 +1,147 @@
+<!--添加衣物页面-->
+<view class="add-clothing-container">
+  <!-- Step 1: 选择/拍照 -->
+  <view class="step-container" wx:if="{{currentStep === 1}}">
+    <view class="step-header">
+      <text class="step-title">📸 选择衣物照片</text>
+      <text class="step-desc">拍摄或从相册选择一张衣物照片</text>
+    </view>
+
+    <view class="image-selector">
+      <view class="selector-btn" bindtap="onTakePhoto">
+        <text class="btn-icon">📷</text>
+        <text class="btn-text">拍照</text>
+      </view>
+      <view class="selector-btn" bindtap="onChooseImage">
+        <text class="btn-icon">🖼️</text>
+        <text class="btn-text">从相册选择</text>
+      </view>
+    </view>
+
+    <view class="tips">
+      <text class="tip-icon">💡</text>
+      <text class="tip-text">建议：使用纯色背景拍摄，效果更好</text>
+    </view>
+  </view>
+
+  <!-- Step 2: AI抠图处理 -->
+  <view class="step-container" wx:if="{{currentStep === 2}}">
+    <view class="step-header">
+      <text class="step-title">✨ AI正在处理</text>
+      <text class="step-desc">{{processMessage}}</text>
+    </view>
+
+    <view class="process-preview">
+      <image class="preview-image" src="{{selectedImage}}" mode="aspectFit"></image>
+
+      <view class="loading-overlay" wx:if="{{processing}}">
+        <view class="magic-circle">
+          <view class="circle-1"></view>
+          <view class="circle-2"></view>
+          <view class="circle-3"></view>
+        </view>
+        <text class="loading-text">{{processMessage}}</text>
+      </view>
+
+      <!-- 处理完成后的对比 -->
+      <view class="result-compare" wx:if="{{!processing && processedImage}}">
+        <view class="compare-item">
+          <text class="compare-label">处理前</text>
+          <image class="compare-image" src="{{selectedImage}}" mode="aspectFit"></image>
+        </view>
+        <view class="compare-arrow">→</view>
+        <view class="compare-item">
+          <text class="compare-label">处理后</text>
+          <image class="compare-image" src="{{processedImage}}" mode="aspectFit"></image>
+        </view>
+      </view>
+    </view>
+
+    <view class="step-actions" wx:if="{{!processing}}">
+      <button class="btn-secondary" bindtap="onReselect">重新选择</button>
+      <button class="btn-primary" bindtap="onNextStep">下一步</button>
+    </view>
+  </view>
+
+  <!-- Step 3: 补充信息 -->
+  <view class="step-container" wx:if="{{currentStep === 3}}">
+    <view class="step-header">
+      <text class="step-title">📝 补充衣物信息</text>
+      <text class="step-desc">完善信息，方便日后查找</text>
+    </view>
+
+    <!-- 处理后的图片预览 -->
+    <view class="result-preview">
+      <image class="result-image" src="{{processedImage || selectedImage}}" mode="aspectFit"></image>
+    </view>
+
+    <!-- 信息表单 -->
+    <view class="info-form">
+      <!-- 名称 -->
+      <view class="form-item">
+        <text class="form-label">衣物名称</text>
+        <input
+          class="form-input"
+          placeholder="例如：白色衬衫"
+          value="{{clothingName}}"
+          bindinput="onNameInput"
+        />
+      </view>
+
+      <!-- 分类 -->
+      <view class="form-item">
+        <text class="form-label">分类</text>
+        <view class="category-buttons">
+          <view
+            class="category-btn {{selectedCategory === item.key ? 'active' : ''}}"
+            wx:for="{{categories}}"
+            wx:key="key"
+            bindtap="onSelectCategory"
+            data-key="{{item.key}}"
+          >
+            <text class="btn-icon">{{item.icon}}</text>
+            <text class="btn-text">{{item.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 智能标签 -->
+      <view class="form-item">
+        <text class="form-label">标签</text>
+        <text class="form-hint">（AI智能识别，可修改）</text>
+        <view class="tags-container">
+          <view
+            class="tag {{tag.selected ? 'selected' : ''}}"
+            wx:for="{{suggestedTags}}"
+            wx:key="*this"
+            wx:for-item="tag"
+            bindtap="onToggleTag"
+            data-index="{{index}}"
+          >
+            <text>{{tag.name}}</text>
+            <text class="tag-close" wx:if="{{tag.selected}}">×</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="save-button-container">
+      <button class="btn-save" bindtap="onSaveClothing">
+        <text class="save-icon">✓</text>
+        <text>存入我的衣柜</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 成功动画（烟花效果） -->
+  <view class="success-overlay" wx:if="{{showSuccess}}">
+    <view class="success-content">
+      <text class="success-icon">🎉</text>
+      <text class="success-text">添加成功！</text>
+      <view class="firework firework-1"></view>
+      <view class="firework firework-2"></view>
+      <view class="firework firework-3"></view>
+    </view>
+  </view>
+</view>

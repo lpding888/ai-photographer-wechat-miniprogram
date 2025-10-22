@@ -1,0 +1,53 @@
+/* 用户反馈页面样式 */
+.feedback-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-bottom: 40rpx;
+}
+
+/* 页面头部 */
+.page-header {
+  background: linear-gradient(135deg, #465C88 0%, #5A6C96 100%);
+  padding: 60rpx 30rpx 40rpx;
+  color: white;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  opacity: 0.9;
+  display: block;
+}
+
+/* 内容区域 */
+.section {
+  background: white;
+  margin: 20rpx;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 25rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+/* 反馈类型选择 */
+.feedback-types {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}

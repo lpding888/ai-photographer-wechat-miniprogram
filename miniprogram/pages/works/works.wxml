@@ -1,0 +1,204 @@
+<!--作品页面-->
+<view class="container">
+  <!-- 多任务进行中列表 -->
+  <view wx:if="{{progressList.length > 0}}" class="progress-list">
+    <block wx:for="{{progressList}}" wx:key="taskId">
+      <view class="progress-card progress-card-sm">
+        <view class="progress-head">
+          <text class="progress-title">{{item.message || '正在生成作品…'}}</text>
+          <text class="progress-eta">{{item.etaText}}</text>
+        </view>
+        <view class="progress-sub">
+          <text wx:if="{{item.completed !== null && item.total !== null}}" class="progress-count">{{item.completed}} / {{item.total}}</text>
+          <text wx:else class="progress-hint">预计约10分钟完成</text>
+        </view>
+        <view class="progress-bar">
+          <view class="bar-bg">
+            <view class="bar-fill" style="width: {{item.percent}}%;"></view>
+          </view>
+          <text class="bar-percent">{{item.percent}}%</text>
+        </view>
+        <view class="progress-actions">
+          <button class="mini-btn" size="mini" plain="true" data-task-id="{{item.taskId}}" bindtap="cancelTask">取消任务</button>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 进行中进度卡片（单任务回退） -->
+  <view wx:if="{{progressList.length === 0 && progressCard.visible}}" class="progress-card">
+    <view class="progress-head">
+      <text class="progress-title">{{progressCard.message || '正在生成作品…'}}</text>
+      <text class="progress-eta">{{progressCard.etaText}}</text>
+    </view>
+    <view class="progress-sub">
+      <text wx:if="{{progressCard.completed !== null && progressCard.total !== null}}" class="progress-count">{{progressCard.completed}} / {{progressCard.total}}</text>
+      <text wx:else class="progress-hint">预计约10分钟完成</text>
+    </view>
+    <view class="progress-bar">
+      <view class="bar-bg">
+        <view class="bar-fill" style="width: {{progressCard.percent}}%;"></view>
+      </view>
+      <text class="bar-percent">{{progressCard.percent}}%</text>
+    </view>
+  </view>
+
+  <!-- 标签栏 -->
+  <view class="tabs-container">
+    <scroll-view class="tabs-scroll" scroll-x="true">
+      <view class="tabs">
+        <block wx:for="{{tabs}}" wx:key="key">
+          <view 
+            class="tab-item {{currentTab === index ? 'active' : ''}}"
+            data-index="{{index}}"
+            bindtap="switchTab"
+          >
+            <text>{{item.label}}</text>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 作品列表 -->
+  <view class="works-container">
+    <!-- 首屏骨架：只在首次加载且暂无数据时显示 -->
+    <block wx:if="{{loading && !firstLoadDone && (!works || works.length===0)}}">
+      <state loading="{{true}}" skeleton="{{true}}" variant="list"></state>
+    </block>
+    <!-- 空状态 -->
+    <view wx:elif="{{isEmpty && !loading}}" class="empty-state">
+      <!-- 统一状态组件 -->
+      <state loading="{{loading}}" empty="{{isEmpty && !loading}}" emptyText="还没有拍摄作品" tips="让AI摄影师为你拍第一张大片吧"></state>
+      <button class="create-btn" bindtap="goToPhotography">开始拍摄</button>
+    </view>
+
+    <!-- 作品网格：始终显示（有数据时） -->
+    <block wx:if="{{works && works.length > 0}}">
+      <view class="works-grid">
+      <block wx:for="{{works}}" wx:key="id">
+        <view class="work-item" data-id="{{item.id}}" data-index="{{index}}" bindtap="viewWork" bindlongpress="onItemLongPress">
+          <!-- 作品图片 -->
+          <view class="work-image">
+            <image
+              src="{{item.shouldLoad ? item.thumbnail : ''}}"
+              mode="aspectFill"
+              data-url="{{item.thumbnail}}"
+              data-work-id="{{item.id}}"
+              data-index="{{index}}"
+              class="lazy-image {{item.shouldLoad ? 'loaded' : 'loading'}}"
+              binderror="onImageError"
+              bindload="onImageLoad"
+            />
+            <!-- 懒加载占位符 -->
+            <view wx:if="{{!item.shouldLoad}}" class="image-placeholder">
+              <view class="placeholder-icon">📷</view>
+            </view>
+            
+            <!-- 作品类型标签 -->
+            <view class="work-type-tag">
+              <text wx:if="{{item.type === 'photography'}}">摄影</text>
+              <text wx:elif="{{item.type === 'fitting'}}">换装</text>
+              <text wx:elif="{{item.type === 'fitting-personal'}}">试衣</text>
+              <text wx:elif="{{item.type === 'travel'}}">旅行</text>
+            </view>
+            
+            <!-- 收藏按钮 -->
+            <view 
+              class="favorite-btn {{item.is_favorite ? 'active' : ''}}"
+              data-id="{{item.id}}"
+              bindtap="toggleFavorite"
+            >
+              <text class="iconfont {{item.is_favorite ? 'icon-heart-fill' : 'icon-heart'}}"></text>
+            </view>
+
+            <!-- 状态徽标：进行中/失败 -->
+            <view wx:if="{{item.status === 'processing'}}" class="status-badge status-processing">
+              进行中
+            </view>
+            <view wx:if="{{item.status === 'failed'}}" class="status-badge status-failed">
+              失败
+            </view>
+
+            <!-- 批量进度徽标：received/expected -->
+            <view wx:if="{{item.batch_meta}}" class="batch-badge">
+              {{item.batch_meta.batch_received}} / {{item.batch_meta.batch_expected}}
+            </view>
+          </view>
+          
+          <!-- 作品信息 -->
+          <view class="work-info">
+            <view class="work-title">{{item.title || '未命名作品'}}</view>
+            <view class="work-desc">{{item.description_text}}</view>
+            <view class="work-meta">
+              <text class="work-time">{{item.display_time}}</text>
+              <view class="work-actions">
+                <view 
+                  class="action-btn"
+                  data-id="{{item.id}}"
+                  bindtap="shareWork"
+                >
+                  <text class="iconfont icon-share"></text>
+                </view>
+                <view 
+                  class="action-btn"
+                  data-id="{{item.id}}"
+                  bindtap="deleteWork"
+                >
+                  <text class="iconfont icon-delete"></text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    </block>
+
+    <!-- 加载更多（只在加载更多时显示，不在首次加载时显示） -->
+    <view wx:if="{{loading && works.length > 0 && last_id}}" class="loading-more">
+      <view class="loading-icon">
+        <view class="loading-dot"></view>
+        <view class="loading-dot"></view>
+        <view class="loading-dot"></view>
+      </view>
+      <text>加载中...</text>
+    </view>
+
+    <!-- 没有更多 -->
+    <view wx:if="{{!hasMore && works.length > 0}}" class="no-more">
+      <text>没有更多作品了</text>
+    </view>
+  </view>
+
+  <!-- 筛选面板 -->
+  <view wx:if="{{showFilterPanel}}" class="filter-panel">
+    <view class="filter-mask" bindtap="hideFilter"></view>
+    <view class="filter-content">
+      <view class="filter-header">
+        <text class="filter-title">筛选条件</text>
+        <view class="filter-close" bindtap="hideFilter">
+          <text class="iconfont icon-close"></text>
+        </view>
+      </view>
+      
+      <view class="filter-section">
+        <text class="filter-label">排序方式</text>
+        <view class="filter-options">
+          <view class="filter-option {{sortType === 'create_time' ? 'active' : ''}}" data-type="create_time" bindtap="changeSortType">
+            <text>创建时间</text>
+          </view>
+          <view class="filter-option {{sortType === 'favorite_time' ? 'active' : ''}}" data-type="favorite_time" bindtap="changeSortType">
+            <text>收藏时间</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="filter-actions">
+        <button class="filter-reset" bindtap="resetFilter">重置</button>
+        <button class="filter-confirm" bindtap="applyFilter">确定</button>
+      </view>
+    </view>
+  </view>
+
+</view>

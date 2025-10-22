@@ -1,0 +1,447 @@
+<!--作品详情页面 - 现代化设计-->
+<view class="container page-fade-in">
+  <!-- 加载状态 -->
+  <block wx:if="{{loading}}">
+    <state loading="{{true}}" empty="{{false}}" errorText="" skeleton="{{true}}" variant="detail"></state>
+  </block>
+
+  <block wx:else>
+    <!-- 图片展示区域 -->
+    <view class="hero-section">
+      <swiper
+        class="hero-swiper"
+        indicator-dots="{{work.images.length > 1}}"
+        indicator-color="rgba(255,255,255,0.4)"
+        indicator-active-color="#4A90E2"
+        circular="{{work.images.length > 1}}"
+        bindchange="onImageChange"
+      >
+        <block wx:for="{{work.images}}" wx:key="index">
+          <swiper-item>
+            <image
+              src="{{item.temp_url || item.url}}"
+              mode="aspectFit"
+              class="hero-image"
+              data-index="{{index}}"
+              bindtap="openImageViewer"
+              bindlongpress="onImageLongPress"
+              bindload="onImageLoad"
+              binderror="onImageError"
+              lazy-load="true"
+            />
+          </swiper-item>
+        </block>
+      </swiper>
+
+      <!-- 图片浮层信息 -->
+      <view class="hero-overlay">
+        <!-- 图片计数 -->
+        <view class="image-counter" wx:if="{{work.images.length > 1}}">
+          <text>{{currentImageIndex + 1}} / {{work.images.length}}</text>
+        </view>
+
+        <!-- 快捷操作 -->
+        <view class="quick-actions">
+          <button class="quick-btn" bindtap="enterFullscreen">
+            <text class="iconfont icon-search"></text>
+            <text>全屏</text>
+          </button>
+          <button class="quick-btn {{work.is_favorite ? 'active' : ''}}" bindtap="toggleFavorite">
+            <text class="iconfont {{work.is_favorite ? 'icon-heart-fill' : 'icon-heart'}}"></text>
+            <text>{{work.is_favorite ? '已收藏' : '收藏'}}</text>
+          </button>
+          <button class="quick-btn" bindtap="saveToMemory">
+            <text class="iconfont icon-camera"></text>
+            <text>存回忆</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 主要内容区域 -->
+    <view class="content-area">
+      <!-- 作品信息卡片 -->
+      <view class="info-card card-hover">
+        <view class="work-header">
+          <view class="title-section">
+            <view class="title-container">
+              <text class="work-title" wx:if="{{!editingTitle}}" bindtap="startEditTitle">{{work.title || '点击设置作品名称'}}</text>
+              <input class="title-input" wx:else value="{{editingTitleValue}}" bindinput="onTitleInput" bindblur="finishEditTitle" bindconfirm="finishEditTitle" placeholder="请输入作品名称" auto-focus="true" />
+              <button class="edit-title-btn" wx:if="{{!editingTitle}}" bindtap="startEditTitle">
+                <text class="iconfont icon-edit"></text>
+              </button>
+            </view>
+            <view class="work-tags">
+              <text class="tag primary">
+                {{work.type === 'photography' ? 'AI摄影' : 'AI试衣'}}
+              </text>
+              <text class="tag {{work.status === 'completed' ? 'success' : 'warning'}}" wx:if="{{work.status}}">
+                {{work.status === 'completed' ? '已完成' : work.status}}
+              </text>
+            </view>
+          </view>
+
+          <view class="work-meta">
+            <view class="meta-item">
+              <text class="iconfont icon-time"></text>
+              <text>{{formatTime(work.created_at)}}</text>
+            </view>
+            <view class="meta-item" wx:if="{{work.scene_name}}">
+              <text class="iconfont icon-location"></text>
+              <text>{{work.scene_name}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 摄影师说（AI返回的文字描述） -->
+        <view wx:if="{{work.ai_description}}" class="ai-section">
+          <view class="section-header">
+            <view class="header-left">
+              <text class="iconfont icon-robot"></text>
+              <text>摄影师说</text>
+            </view>
+            <button class="copy-btn" bindtap="copyAIDescription">
+              <text class="iconfont icon-copy"></text>
+              <text>复制</text>
+            </button>
+          </view>
+          <view class="ai-content">
+            <text>{{work.ai_description}}</text>
+          </view>
+        </view>
+
+        <!-- 原图对比 -->
+        <view wx:if="{{originalImagesUrls && originalImagesUrls.length > 0}}" class="original-images-section">
+          <view class="section-header">
+            <view class="header-left">
+              <text class="iconfont icon-image"></text>
+              <text>原图参考</text>
+            </view>
+            <text class="image-count">{{originalImagesUrls.length}}张</text>
+          </view>
+          <view class="original-images-grid">
+            <block wx:for="{{originalImagesUrls}}" wx:key="index">
+              <view class="original-image-item" bindtap="previewOriginalImage" data-index="{{index}}">
+                <image
+                  src="{{item.url}}"
+                  mode="aspectFill"
+                  class="original-image"
+                  lazy-load="true"
+                />
+                <view class="image-type-tag" wx:if="{{item.typeLabel}}">{{item.typeLabel}}</view>
+              </view>
+            </block>
+          </view>
+        </view>
+
+        <!-- 生成参数 -->
+        <view wx:if="{{work.parameters}}" class="info-group">
+          <view class="info-group-header" bindtap="toggleParams">
+            <view class="info-group-title">
+              <text class="iconfont icon-settings"></text>
+              <text>生成参数</text>
+            </view>
+            <view class="info-group-summary">
+              <text wx:if="{{!showParams}}">点击查看</text>
+              <text class="iconfont {{showParams ? 'icon-up' : 'icon-down'}}"></text>
+            </view>
+          </view>
+          <view wx:if="{{showParams}}" class="info-group-content">
+            <view class="params-grid">
+              <!-- 摄影参数 -->
+              <block wx:if="{{work.type === 'photography'}}">
+                <view class="param-chip" wx:if="{{work.parameters.gender}}">
+                  <text class="param-label">性别</text>
+                  <text class="param-value">{{work.parameters.gender === 'female' ? '女性' : '男性'}}</text>
+                </view>
+                <view class="param-chip" wx:if="{{work.parameters.age}}">
+                  <text class="param-label">年龄</text>
+                  <text class="param-value">{{work.parameters.age}}岁</text>
+                </view>
+                <view class="param-chip" wx:if="{{work.parameters.height}}">
+                  <text class="param-label">身高</text>
+                  <text class="param-value">{{work.parameters.height}}cm</text>
+                </view>
+                <view class="param-chip" wx:if="{{work.parameters.nationality}}">
+                  <text class="param-label">类型</text>
+                  <text class="param-value">{{work.parameters.nationality}}</text>
+                </view>
+                <view class="param-chip" wx:if="{{work.parameters.location}}">
+                  <text class="param-label">场景</text>
+                  <text class="param-value">{{work.parameters.location}}</text>
+                </view>
+              </block>
+
+              <!-- 试衣参数 -->
+              <block wx:elif="{{work.type === 'fitting'}}">
+                <view class="param-chip" wx:if="{{work.parameters.overall_clothing_material}}">
+                  <text class="param-label">材质</text>
+                  <text class="param-value">{{work.parameters.overall_clothing_material}}</text>
+                </view>
+                <view class="param-chip" wx:if="{{work.parameters.pose_adjustment}}">
+                  <text class="param-label">姿态</text>
+                  <text class="param-value">{{work.parameters.pose_adjustment}}</text>
+                </view>
+              </block>
+            </view>
+          </view>
+        </view>
+
+        <!-- 技术信息（简化） -->
+        <view class="info-group" wx:if="{{work.images[0].width || work.api_provider}}">
+          <view class="info-group-header" bindtap="toggleTechInfo">
+            <view class="info-group-title">
+              <text class="iconfont icon-info"></text>
+              <text>技术信息</text>
+            </view>
+            <view class="info-group-summary">
+              <text wx:if="{{!showTechExpanded}}">{{work.images[0].width}}×{{work.images[0].height}}</text>
+              <text class="iconfont {{showTechExpanded ? 'icon-up' : 'icon-down'}}"></text>
+            </view>
+          </view>
+          <view wx:if="{{showTechExpanded}}" class="info-group-content">
+            <view class="tech-grid">
+              <view class="tech-chip" wx:if="{{work.images[0].width}}">
+                <text class="tech-label">分辨率</text>
+                <text class="tech-value">{{work.images[0].width}}×{{work.images[0].height}}</text>
+              </view>
+              <view class="tech-chip" wx:if="{{work.api_provider}}">
+                <text class="tech-label">AI引擎</text>
+                <text class="tech-value">{{work.api_provider}}</text>
+              </view>
+              <view class="tech-chip" wx:if="{{work.generation_time}}">
+                <text class="tech-label">生成时间</text>
+                <text class="tech-value">{{work.generation_time}}秒</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 主要操作按钮 -->
+    <view class="action-area">
+      <view class="primary-actions">
+        <button class="action-btn primary btn-enhanced btn-ripple" bindtap="regenerate">
+          <text class="iconfont icon-refresh"></text>
+          <text>同款再生</text>
+        </button>
+
+        <button class="action-btn highlight btn-enhanced btn-shine" bindtap="showPoseVariationModal">
+          <text class="iconfont icon-camera"></text>
+          <text>换个姿势再拍</text>
+        </button>
+
+        <button class="action-btn secondary btn-enhanced btn-ripple" bindtap="saveToAlbum">
+          <text class="iconfont icon-download"></text>
+          <text>保存图片</text>
+        </button>
+      </view>
+
+      <view class="secondary-actions">
+        <button class="action-btn ghost btn-enhanced" open-type="share">
+          <text class="iconfont icon-share"></text>
+          <text>分享</text>
+        </button>
+
+        <button class="action-btn ghost btn-enhanced" bindtap="generateSharePoster">
+          <text class="iconfont icon-image"></text>
+          <text>生成海报</text>
+        </button>
+
+        <button class="action-btn ghost btn-enhanced" bindtap="submitFeedback">
+          <text class="iconfont icon-edit"></text>
+          <text>反馈</text>
+        </button>
+
+        <button class="action-btn danger" bindtap="deleteWork">
+          <text class="iconfont icon-delete"></text>
+          <text>删除</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 全屏图片查看器 -->
+    <view class="image-viewer" wx:if="{{showImageViewer}}" bindtap="closeImageViewer">
+      <view class="viewer-container" catchtap="stopPropagation">
+        <swiper
+          class="viewer-swiper"
+          indicator-dots="{{imageViewerUrls.length > 1}}"
+          indicator-color="rgba(255,255,255,0.5)"
+          indicator-active-color="#fff"
+          circular="{{imageViewerUrls.length > 1}}"
+          current="{{currentImageIndex}}"
+          bindchange="onImageChange"
+        >
+          <block wx:for="{{imageViewerUrls}}" wx:key="index">
+            <swiper-item>
+              <image
+                src="{{item}}"
+                mode="aspectFit"
+                class="viewer-image"
+                data-index="{{index}}"
+                bindlongpress="onImageLongPress"
+              />
+            </swiper-item>
+          </block>
+        </swiper>
+
+        <!-- 关闭按钮 -->
+        <button class="close-btn" bindtap="closeImageViewer">✕</button>
+      </view>
+    </view>
+
+    <!-- 姿势裂变弹窗 -->
+    <view class="pose-variation-modal" wx:if="{{showPoseModal}}" bindtap="closePoseModal">
+      <view class="modal-content" catchtap="stopPropagation">
+        <view class="modal-header">
+          <text class="modal-title">换个姿势再拍</text>
+          <text class="modal-subtitle">告诉摄影师你想要的姿势或动作</text>
+        </view>
+
+        <view class="modal-body">
+          <!-- 模式选择 -->
+          <view class="mode-selector">
+            <view
+              class="mode-option {{poseMode === 'ai' ? 'active' : ''}}"
+              bindtap="selectPoseMode"
+              data-mode="ai"
+            >
+              <text class="mode-icon">🤖</text>
+              <text class="mode-name">AI裂变</text>
+            </view>
+            <view
+              class="mode-option {{poseMode === 'preset' ? 'active' : ''}}"
+              bindtap="selectPoseMode"
+              data-mode="preset"
+            >
+              <text class="mode-icon">☑</text>
+              <text class="mode-name">选择姿势</text>
+            </view>
+            <view
+              class="mode-option {{poseMode === 'custom' ? 'active' : ''}}"
+              bindtap="selectPoseMode"
+              data-mode="custom"
+            >
+              <text class="mode-icon">✎</text>
+              <text class="mode-name">自定义</text>
+            </view>
+          </view>
+
+          <!-- AI姿势裂变 -->
+          <view class="ai-pose-variation" wx:if="{{poseMode === 'ai'}}">
+            <view class="ai-intro">
+              <text class="intro-icon">💡</text>
+              <text class="intro-text">基于第一次生成的描述，AI为您智能生成姿势变体</text>
+            </view>
+
+            <!-- AI生成动画（30秒） -->
+            <view wx:if="{{aiLoading}}" class="ai-generating-animation">
+              <view class="animation-content">
+                <!-- 旋转相机图标 -->
+                <view class="camera-icon rotating">
+                  <text class="icon">📸</text>
+                </view>
+
+                <!-- 标题 -->
+                <view class="loading-title">AI设计动作中...</view>
+
+                <!-- 进度条 -->
+                <view class="progress-container">
+                  <view class="progress-bar">
+                    <view class="progress-fill"></view>
+                  </view>
+                  <text class="progress-text">预计需要 30 秒</text>
+                </view>
+
+                <!-- 动态提示文字 -->
+                <view class="loading-tips">
+                  <text class="tip-icon">💡</text>
+                  <text class="tip-text">{{aiLoadingTip}}</text>
+                </view>
+
+                <!-- 装饰元素 -->
+                <view class="decoration-dots">
+                  <view class="dot dot-1"></view>
+                  <view class="dot dot-2"></view>
+                  <view class="dot dot-3"></view>
+                </view>
+              </view>
+            </view>
+
+            <scroll-view wx:elif="{{aiGeneratedPoses.length > 0}}" scroll-y class="pose-scroll">
+              <view
+                class="pose-item {{selectedAIPose === item ? 'selected' : ''}}"
+                wx:for="{{aiGeneratedPoses}}"
+                wx:key="index"
+                bindtap="selectAIPose"
+                data-pose="{{item}}"
+              >
+                <text class="pose-number">{{index + 1}}</text>
+                <view class="pose-info">
+                  <text class="pose-desc">{{item}}</text>
+                </view>
+                <text class="iconfont icon-check" wx:if="{{selectedAIPose === item}}"></text>
+              </view>
+            </scroll-view>
+
+            <view wx:else class="empty-poses">
+              <text class="empty-icon">📸</text>
+              <text class="empty-text">正在为您生成姿势变体...</text>
+            </view>
+          </view>
+
+          <!-- 预设姿势列表 -->
+          <view class="pose-presets" wx:if="{{poseMode === 'preset'}}">
+            <view wx:if="{{loadingPoses}}" class="loading-poses">
+              <text>加载姿势列表中...</text>
+            </view>
+            <scroll-view wx:else scroll-y class="pose-scroll">
+              <view
+                class="pose-item {{selectedPoseId === item._id ? 'selected' : ''}}"
+                wx:for="{{posePresets}}"
+                wx:key="_id"
+                bindtap="selectPose"
+                data-id="{{item._id}}"
+                data-name="{{item.name}}"
+              >
+                <text class="pose-emoji">{{item.icon_emoji}}</text>
+                <view class="pose-info">
+                  <text class="pose-name">{{item.name}}</text>
+                  <text class="pose-desc">{{item.description}}</text>
+                </view>
+                <text class="iconfont icon-check" wx:if="{{selectedPoseId === item._id}}"></text>
+              </view>
+            </scroll-view>
+          </view>
+
+          <!-- 自定义输入 -->
+          <view class="custom-input" wx:if="{{poseMode === 'custom'}}">
+            <textarea
+              class="pose-textarea"
+              placeholder="告诉摄影师你想要的角度或动作，例如：&#10;&#10;侧面特写、走近镜头、背影、45度仰拍...&#10;&#10;留空则由摄影师根据场景自动设计下一个动作"
+              value="{{customPoseDescription}}"
+              bindinput="onCustomPoseInput"
+              maxlength="500"
+              show-confirm-bar="{{false}}"
+            />
+            <text class="char-count">{{customPoseDescription.length}}/500</text>
+          </view>
+
+          <!-- 积分提示 -->
+          <view class="credit-info">
+            <text class="iconfont icon-coin"></text>
+            <text>消耗 1 积分</text>
+          </view>
+        </view>
+
+        <view class="modal-footer">
+          <button class="modal-btn cancel" bindtap="closePoseModal">取消</button>
+          <button class="modal-btn confirm" bindtap="confirmPoseVariation" disabled="{{!canConfirm}}">
+            开始拍摄
+          </button>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

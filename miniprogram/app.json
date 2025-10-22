@@ -1,0 +1,109 @@
+{
+  "pages": [
+    "pages/mode-select/mode-select",
+    "pages/index/index",
+    "pages/commercial/commercial",
+    "pages/personal/personal",
+    "pages/photography/photography",
+    "pages/fitting/fitting",
+    "pages/fitting-personal/fitting-personal",
+    "pages/wardrobe/wardrobe",
+    "pages/styling-planner/styling-planner",
+    "pages/memories/memories",
+    "pages/travel/travel",
+    "pages/works/works",
+    "pages/work-detail/work-detail",
+    "pages/progress/progress",
+    "pages/profile/profile",
+    "pages/credits/credits",
+    "pages/recharge/recharge",
+    "pages/personal-home/personal-home",
+    "pages/ai-play/ai-play",
+    "pages/personal-works/personal-works",
+    "pages/personal-profile/personal-profile"
+  ],
+  "tabBar": {
+    "custom": true,
+    "color": "#666666",
+    "selectedColor": "#FF9A56",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "摄影"
+      },
+      {
+        "pagePath": "pages/wardrobe/wardrobe",
+        "text": "衣柜"
+      },
+      {
+        "pagePath": "pages/ai-play/ai-play",
+        "text": "AI玩"
+      },
+      {
+        "pagePath": "pages/works/works",
+        "text": "作品"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "会说话的AI摄影师",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f8f9fa",
+    "enablePullDownRefresh": true,
+    "onReachBottomDistance": 50
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "requiredBackgroundModes": ["audio"],
+  "networkTimeout": {
+    "request": 60000,
+    "downloadFile": 60000,
+    "uploadFile": 60000
+  },
+  "debug": false,
+  "cloud": true,
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "subPackages": [
+    {
+      "root": "pages/subPackageAdmin",
+      "pages": [
+        "admin-center",
+        "admin-models",
+        "debug-scenes",
+        "setup-api"
+      ]
+    },
+    {
+      "root": "pages/subPackageRecords",
+      "pages": [
+        "recharge",
+        "consume",
+        "feedback"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["__APP__"]
+    },
+    "pages/profile/profile": {
+      "network": "all",
+      "packages": ["pages/subPackageRecords"]
+    }
+  }
+}

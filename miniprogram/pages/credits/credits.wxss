@@ -1,0 +1,313 @@
+/* 积分明细页面样式 - 与其他页面统一风格 */
+.credits-container {
+  background: #E9E3DF;
+  min-height: 100vh;
+  padding: 40rpx;
+}
+
+/* 积分概览卡片 */
+.overview-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.overview-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #000000;
+}
+
+.info-btn {
+  background: rgba(70, 92, 136, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #465C88;
+  font-size: 24rpx;
+  padding: 0;
+  line-height: 60rpx;
+}
+
+.credits-display {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.current-credits {
+  font-size: 72rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10rpx;
+  color: #465C88;
+}
+
+.credits-label {
+  font-size: 28rpx;
+  color: #666666;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 30rpx;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 40rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8rpx;
+  color: #000000;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: #E9E3DF;
+}
+
+.recharge-btn {
+  width: 100%;
+  background: #465C88;
+  border: none;
+  border-radius: 50rpx;
+  color: white;
+  padding: 25rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.btn-icon {
+  font-size: 24rpx;
+}
+
+/* 筛选条件 */
+.filter-section {
+  margin-bottom: 30rpx;
+}
+
+.filter-tabs {
+  display: flex;
+  background: white;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.filter-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 10rpx;
+  border-radius: 10rpx;
+  transition: all 0.3s ease;
+}
+
+.filter-tab.active {
+  background: #465C88;
+  color: white;
+}
+
+.filter-icon {
+  font-size: 28rpx;
+  margin-bottom: 8rpx;
+}
+
+.filter-label {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #000000;
+}
+
+.filter-tab.active .filter-label {
+  color: white;
+}
+
+/* 明细列表 */
+.records-section {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #E9E3DF;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #000000;
+}
+
+.record-count {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.records-list {
+  margin-bottom: 20rpx;
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  padding: 25rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-icon {
+  margin-right: 20rpx;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E9E3DF;
+  border-radius: 50%;
+}
+
+.icon-emoji {
+  font-size: 28rpx;
+}
+
+.record-content {
+  flex: 1;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.record-type {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #000000;
+}
+
+.record-amount {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.record-amount.earn {
+  color: #465C88;
+}
+
+.record-amount.spend {
+  color: #999999;
+}
+
+.record-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+
+.record-time {
+  font-size: 22rpx;
+  color: #999999;
+}
+
+.record-description {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+/* 加载状态 */
+.load-more, .loading-state {
+  text-align: center;
+  padding: 30rpx;
+}
+
+.load-more-text, .loading-text {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 80rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999999;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.empty-tip {
+  font-size: 26rpx;
+  color: #CCCCCC;
+  margin-bottom: 40rpx;
+  display: block;
+}
+
+.empty-action {
+  background: #465C88;
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+}
+
+/* 通用工具类 */
+.flex {
+  display: flex;
+}
+
+.align-center {
+  align-items: center;
+}

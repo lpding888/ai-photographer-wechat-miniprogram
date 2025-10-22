@@ -1,0 +1,20 @@
+{
+  "name": "cache-helper",
+  "version": "1.0.0",
+  "description": "缓存助手云函数 - 提供临时URL缓存和图片优化服务",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cache",
+    "image-optimization",
+    "temp-url",
+    "wechat-cloud"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

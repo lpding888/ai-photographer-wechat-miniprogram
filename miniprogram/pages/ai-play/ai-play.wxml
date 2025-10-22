@@ -1,0 +1,233 @@
+<!-- AI玩页面 - 虚拟试衣 + 全球打卡 -->
+<view class="container">
+  <!-- 顶部切换Tab -->
+  <view class="top-tabs">
+    <view class="tab-item {{activeTab === 'fitting' ? 'active' : ''}}" bindtap="switchTab" data-tab="fitting">
+      <text class="tab-icon">🪞</text>
+      <text class="tab-text">虚拟试衣</text>
+    </view>
+    <view class="tab-item {{activeTab === 'travel' ? 'active' : ''}}" bindtap="switchTab" data-tab="travel">
+      <text class="tab-icon">✈️</text>
+      <text class="tab-text">去旅行</text>
+    </view>
+    <view class="tab-item {{activeTab === 'planner' ? 'active' : ''}}" bindtap="switchTab" data-tab="planner">
+      <text class="tab-icon">📅</text>
+      <text class="tab-text">造型规划</text>
+    </view>
+  </view>
+
+  <!-- 虚拟试衣内容 -->
+  <view class="content-area" wx:if="{{activeTab === 'fitting'}}">
+    <view class="section-header">
+      <text class="section-title">虚拟试衣间</text>
+      <text class="section-desc">从衣柜选择衣物，AI帮你试穿</text>
+    </view>
+
+    <!-- 上传照片区域 -->
+    <view class="upload-section">
+      <view class="upload-box" wx:if="{{!userPhoto}}" bindtap="uploadUserPhoto">
+        <view class="upload-icon">📷</view>
+        <text class="upload-text">上传你的照片</text>
+      </view>
+      <view class="preview-box" wx:else>
+        <image class="user-photo" src="{{userPhoto}}" mode="aspectFill"></image>
+        <view class="change-btn" bindtap="uploadUserPhoto">更换照片</view>
+      </view>
+    </view>
+
+    <!-- 选择衣物 -->
+    <view class="clothes-section">
+      <view class="section-label">
+        <text>选择衣物</text>
+        <view class="select-btn" bindtap="selectClothes">
+          <text class="btn-icon">👔</text>
+          <text>从衣柜选择</text>
+        </view>
+      </view>
+
+      <view class="selected-clothes" wx:if="{{selectedClothes.length > 0}}">
+        <view class="clothes-item" wx:for="{{selectedClothes}}" wx:key="id">
+          <image class="clothes-img" src="{{item.processedImage || item.url}}" mode="aspectFit"></image>
+          <text class="clothes-name">{{item.name}}</text>
+        </view>
+      </view>
+
+      <view class="empty-clothes" wx:else>
+        <text>还未选择衣物</text>
+      </view>
+    </view>
+
+    <!-- 生成按钮 -->
+    <view class="action-area">
+      <button class="generate-btn" bindtap="generateFitting" disabled="{{generating}}">
+        <text class="btn-icon">✨</text>
+        <text>{{generating ? '生成中...' : '开始试衣'}}</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 去旅行内容 -->
+  <view class="content-area" wx:if="{{activeTab === 'travel'}}">
+    <view class="section-header">
+      <text class="section-title">AI全球打卡</text>
+      <text class="section-desc">选择目的地，AI带你环游世界</text>
+    </view>
+
+    <!-- 上传照片区域 -->
+    <view class="upload-section">
+      <view class="upload-box" wx:if="{{!userPhoto}}" bindtap="uploadUserPhoto">
+        <view class="upload-icon">📷</view>
+        <text class="upload-text">上传你的照片</text>
+      </view>
+      <view class="preview-box" wx:else>
+        <image class="user-photo" src="{{userPhoto}}" mode="aspectFill"></image>
+        <view class="change-btn" bindtap="uploadUserPhoto">更换照片</view>
+      </view>
+    </view>
+
+    <!-- 选择目的地 -->
+    <view class="destination-section">
+      <view class="section-label">
+        <text>选择目的地</text>
+      </view>
+
+      <scroll-view class="destinations-scroll" scroll-x>
+        <view class="destination-list">
+          <view
+            class="destination-card {{selectedDestination === item.id ? 'selected' : ''}}"
+            wx:for="{{destinations}}"
+            wx:key="id"
+            bindtap="selectDestination"
+            data-id="{{item.id}}">
+            <image class="dest-img" src="{{item.image}}" mode="aspectFill"></image>
+            <view class="dest-info">
+              <text class="dest-name">{{item.name}}</text>
+              <text class="dest-location">{{item.location}}</text>
+            </view>
+            <view class="dest-check" wx:if="{{selectedDestination === item.id}}">✓</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="more-destinations" bindtap="showAllDestinations">
+        <text>查看全部目的地 →</text>
+      </view>
+    </view>
+
+    <!-- 生成按钮 -->
+    <view class="action-area">
+      <button class="generate-btn" bindtap="generateTravel" disabled="{{generating}}">
+        <text class="btn-icon">✨</text>
+        <text>{{generating ? '生成中...' : 'AI生成打卡照'}}</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 造型规划内容 -->
+  <view class="content-area" wx:if="{{activeTab === 'planner'}}">
+    <view class="section-header">
+      <text class="section-title">造型规划器</text>
+      <text class="section-desc">规划每日穿搭，让每天都有仪式感</text>
+    </view>
+
+    <!-- 规划功能入口 -->
+    <view class="planner-entry">
+      <view class="entry-card" bindtap="goToPlanner">
+        <view class="card-icon-large">📅</view>
+        <text class="card-title">打开造型规划器</text>
+        <text class="card-desc">日历视图 · 事件管理 · AI穿搭建议</text>
+        <view class="card-arrow">→</view>
+      </view>
+
+      <view class="feature-list">
+        <view class="feature-item">
+          <text class="feature-icon">📆</text>
+          <view class="feature-text">
+            <text class="feature-name">日历视图</text>
+            <text class="feature-detail">查看每日穿搭计划</text>
+          </view>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">✨</text>
+          <view class="feature-text">
+            <text class="feature-name">AI建议</text>
+            <text class="feature-detail">根据场合智能推荐搭配</text>
+          </view>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">💭</text>
+          <view class="feature-text">
+            <text class="feature-name">记录回忆</text>
+            <text class="feature-detail">保存每日穿搭照片</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 衣物选择弹窗 -->
+<view class="clothes-modal {{showClothesModal ? 'show' : ''}}" catchtap="closeClothesModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">选择衣物</text>
+      <view class="modal-close" bindtap="closeClothesModal">×</view>
+    </view>
+
+    <scroll-view class="modal-body" scroll-y>
+      <view class="clothes-grid">
+        <view
+          class="clothes-card {{item.selected ? 'selected' : ''}}"
+          wx:for="{{wardrobeItems}}"
+          wx:key="id"
+          bindtap="toggleClothes"
+          data-id="{{item.id}}">
+          <image class="card-img" src="{{item.processedImage || item.url}}" mode="aspectFit"></image>
+          <text class="card-name">{{item.name}}</text>
+          <view class="card-check" wx:if="{{item.selected}}">✓</view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="modal-footer">
+      <view class="selected-count">已选择 {{selectedClothes.length}} 件</view>
+      <button class="confirm-btn" bindtap="confirmClothes">确定</button>
+    </view>
+  </view>
+</view>
+
+<!-- 目的地选择弹窗 -->
+<view class="destinations-modal {{showDestModal ? 'show' : ''}}" catchtap="closeDestModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-header">
+      <text class="modal-title">选择目的地</text>
+      <view class="modal-close" bindtap="closeDestModal">×</view>
+    </view>
+
+    <scroll-view class="modal-body" scroll-y>
+      <view class="dest-categories">
+        <view
+          class="category-tag {{selectedCategory === item ? 'active' : ''}}"
+          wx:for="{{categories}}"
+          wx:key="*this"
+          bindtap="selectCategory"
+          data-category="{{item}}">
+          {{item}}
+        </view>
+      </view>
+
+      <view class="dest-grid">
+        <view
+          class="dest-grid-item"
+          wx:for="{{filteredDestinations}}"
+          wx:key="id"
+          bindtap="selectDestination"
+          data-id="{{item.id}}">
+          <image class="dest-grid-img" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="dest-grid-name">{{item.name}}</view>
+          <view class="dest-grid-location">{{item.location}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

@@ -1,0 +1,209 @@
+<!--AI模型管理页面-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">AI模型管理</text>
+    <button class="add-btn" bindtap="showAddModel" wx:if="{{isAdmin}}">
+      <text class="add-icon">+</text>
+      添加模型
+    </button>
+  </view>
+
+  <!-- 权限提示 -->
+  <view class="no-permission" wx:if="{{!isAdmin}}">
+    <text class="no-permission-text">您没有管理AI模型的权限</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 模型列表 -->
+  <view class="models-list" wx:if="{{!loading && isAdmin}}">
+    <view class="model-card" wx:for="{{models}}" wx:key="_id">
+      <!-- 模型基本信息 -->
+      <view class="model-header">
+        <view class="model-info">
+          <text class="model-name">{{item.name}}</text>
+          <text class="model-provider">{{item.provider}}</text>
+        </view>
+        <view class="model-status">
+          <switch
+            class="status-switch"
+            checked="{{item.is_active}}"
+            bindchange="toggleModelStatus"
+            data-model-id="{{item._id}}"
+            data-current-status="{{item.is_active}}"
+            color="#4A90E2"
+          />
+        </view>
+      </view>
+
+      <!-- 模型详细信息 -->
+      <view class="model-details">
+        <view class="detail-row">
+          <text class="detail-label">类型:</text>
+          <text class="detail-value">{{item.model_type}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">优先级:</text>
+          <text class="detail-value">{{item.priority}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">权重:</text>
+          <text class="detail-value">{{item.weight}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{item.pricing}}">
+          <text class="detail-label">成本:</text>
+          <text class="detail-value">${{item.pricing.cost_per_image}}/张</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="model-actions">
+        <button
+          class="action-btn test-btn"
+          bindtap="testModel"
+          data-model-id="{{item._id}}"
+          size="mini"
+        >
+          测试
+        </button>
+        <button
+          class="action-btn delete-btn"
+          bindtap="deleteModel"
+          data-model-id="{{item._id}}"
+          data-model-name="{{item.name}}"
+          size="mini"
+        >
+          删除
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!loading && isAdmin && models.length === 0}}">
+    <text class="empty-text">暂无AI模型</text>
+    <text class="empty-desc">点击上方按钮添加新模型</text>
+  </view>
+</view>
+
+<!-- 添加模型弹窗 -->
+<view class="modal-overlay" wx:if="{{showAddModal}}" bindtap="hideAddModal">
+  <view class="modal-content" catchtap="">
+    <view class="modal-header">
+      <text class="modal-title">添加AI模型</text>
+      <text class="modal-close" bindtap="hideAddModal">×</text>
+    </view>
+
+    <view class="modal-body">
+      <!-- 模型名称 -->
+      <view class="form-group">
+        <text class="form-label">模型名称 *</text>
+        <input
+          class="form-input"
+          placeholder="如: DALL-E 3"
+          value="{{newModel.name}}"
+          bindinput="onInputChange"
+          data-field="name"
+        />
+      </view>
+
+      <!-- 提供商 -->
+      <view class="form-group">
+        <text class="form-label">提供商 *</text>
+        <input
+          class="form-input"
+          placeholder="如: openai"
+          value="{{newModel.provider}}"
+          bindinput="onInputChange"
+          data-field="provider"
+        />
+      </view>
+
+      <!-- 模型类型 -->
+      <view class="form-group">
+        <text class="form-label">模型类型</text>
+        <picker
+          class="form-picker"
+          range="{{['text-to-image', 'image-to-image', 'text-to-video']}}"
+          value="0"
+          bindchange="onInputChange"
+          data-field="model_type"
+        >
+          <view class="picker-content">{{newModel.model_type}}</view>
+        </picker>
+      </view>
+
+      <!-- API端点 -->
+      <view class="form-group">
+        <text class="form-label">API端点 *</text>
+        <input
+          class="form-input"
+          placeholder="https://api.example.com/generate"
+          value="{{newModel.endpoint}}"
+          bindinput="onInputChange"
+          data-field="endpoint"
+        />
+      </view>
+
+      <!-- API密钥 -->
+      <view class="form-group">
+        <text class="form-label">API密钥</text>
+        <input
+          class="form-input"
+          placeholder="sk-..."
+          value="{{newModel.api_key}}"
+          bindinput="onInputChange"
+          data-field="api_key"
+        />
+      </view>
+
+      <!-- 优先级 -->
+      <view class="form-group">
+        <text class="form-label">优先级 (1-10)</text>
+        <slider
+          class="form-slider"
+          min="1"
+          max="10"
+          value="{{newModel.priority}}"
+          bindchange="onInputChange"
+          data-field="priority"
+          show-value
+        />
+      </view>
+
+      <!-- 权重 -->
+      <view class="form-group">
+        <text class="form-label">权重 (1-10)</text>
+        <slider
+          class="form-slider"
+          min="1"
+          max="10"
+          value="{{newModel.weight}}"
+          bindchange="onInputChange"
+          data-field="weight"
+          show-value
+        />
+      </view>
+
+      <!-- 启用状态 -->
+      <view class="form-group form-group-switch">
+        <text class="form-label">启用模型</text>
+        <switch
+          checked="{{newModel.is_active}}"
+          bindchange="onSwitchChange"
+          data-field="is_active"
+          color="#4A90E2"
+        />
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="modal-btn cancel-btn" bindtap="hideAddModal">取消</button>
+      <button class="modal-btn confirm-btn" bindtap="addNewModel">确定</button>
+    </view>
+  </view>
+</view>

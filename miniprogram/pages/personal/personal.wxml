@@ -1,0 +1,82 @@
+<!--玩美空间入口页面-->
+<view class="container page-fade-in">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">✨ 玩美空间</text>
+    <text class="page-subtitle">个人AI体验，发现不一样的自己</text>
+  </view>
+
+  <!-- 功能卡片网格 -->
+  <view class="features-grid">
+    <!-- 试衣间 -->
+    <view class="feature-card card-hover" bindtap="goToFitting">
+      <view class="card-bg card-bg-1"></view>
+      <view class="card-content">
+        <text class="card-icon">👗</text>
+        <text class="card-title">试衣间</text>
+        <text class="card-desc">虚拟试穿，秒变时尚达人</text>
+      </view>
+      <view class="card-badge">HOT</view>
+    </view>
+
+    <!-- 衣柜 -->
+    <view class="feature-card card-hover" bindtap="goToWardrobe">
+      <view class="card-bg card-bg-2"></view>
+      <view class="card-content">
+        <text class="card-icon">👔</text>
+        <text class="card-title">我的衣柜</text>
+        <text class="card-desc">管理你的服装收藏</text>
+      </view>
+    </view>
+
+    <!-- 全球旅行 -->
+    <view class="feature-card card-hover" bindtap="goToTravel">
+      <view class="card-bg card-bg-3"></view>
+      <view class="card-content">
+        <text class="card-icon">🌍</text>
+        <text class="card-title">全球旅行</text>
+        <text class="card-desc">打卡世界各地美景</text>
+      </view>
+      <view class="card-badge new">NEW</view>
+    </view>
+  </view>
+
+  <!-- 推荐内容 -->
+  <view class="recommend-section">
+    <view class="section-header">
+      <text class="section-title">💡 玩法推荐</text>
+    </view>
+
+    <view class="recommend-cards">
+      <view class="recommend-card">
+        <text class="recommend-icon">1️⃣</text>
+        <view class="recommend-content">
+          <text class="recommend-title">上传照片</text>
+          <text class="recommend-desc">全身或半身照效果更佳</text>
+        </view>
+      </view>
+
+      <view class="recommend-card">
+        <text class="recommend-icon">2️⃣</text>
+        <view class="recommend-content">
+          <text class="recommend-title">选择服装</text>
+          <text class="recommend-desc">从衣柜或相册选择服装</text>
+        </view>
+      </view>
+
+      <view class="recommend-card">
+        <text class="recommend-icon">3️⃣</text>
+        <view class="recommend-content">
+          <text class="recommend-title">AI生成</text>
+          <text class="recommend-desc">查看不同风格的试穿效果</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部装饰 -->
+  <view class="bottom-decoration">
+    <view class="decoration-circle circle-1"></view>
+    <view class="decoration-circle circle-2"></view>
+  </view>
+</view>

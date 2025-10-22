@@ -1,0 +1,353 @@
+<!--试衣间页面-->
+<view class="container page-slide-up">
+  <state loading="{{loading}}" skeleton="{{true}}" variant="detail" />
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">试衣间</text>
+    <text class="page-subtitle">上传个人照片和服装，AI为您智能试衣</text>
+  </view>
+
+  <!-- 个人照片上传 -->
+  <view class="section">
+    <view class="section-title">
+      <text>个人照片</text>
+      <text class="required">*</text>
+      <text class="section-subtitle">（全身照或半身照效果更佳）</text>
+    </view>
+    
+    <view class="single-image-upload">
+      <view wx:if="{{modelImage}}" class="image-item">
+        <image 
+          src="{{modelImage.url}}" 
+          mode="aspectFill"
+          data-url="{{modelImage.url}}"
+          bindtap="previewImage"
+          lazy-load="true"
+        />
+        <view 
+          class="delete-btn"
+          data-type="model"
+          bindtap="deleteImage"
+        >
+          <text class="iconfont icon-close"></text>
+        </view>
+      </view>
+      
+      <view 
+        wx:else
+        class="upload-placeholder"
+        bindtap="chooseModelImage"
+      >
+        <text class="iconfont icon-camera"></text>
+        <text>上传个人照片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 服装配饰上传 -->
+  <view class="section">
+    <view class="section-title">
+      <text>服装配饰</text>
+      <text class="section-subtitle">（至少选择一件）</text>
+    </view>
+    
+    <view class="clothing-grid">
+      <block wx:for="{{clothingTypes}}" wx:key="key">
+        <view class="clothing-item">
+          <view class="clothing-label">{{item.label}}</view>
+          
+          <view wx:if="{{clothingImages[item.key]}}" class="image-item">
+            <image 
+              src="{{clothingImages[item.key].url}}" 
+              mode="aspectFill"
+              data-url="{{clothingImages[item.key].url}}"
+              bindtap="previewImage"
+              lazy-load="true"
+            />
+            <view 
+              class="delete-btn"
+              data-type="{{item.key}}"
+              bindtap="deleteImage"
+            >
+              <text class="iconfont icon-close"></text>
+            </view>
+          </view>
+          
+          <view 
+            wx:else
+            class="upload-btn"
+            data-type="{{item.key}}"
+            bindtap="chooseClothingImage"
+          >
+            <text class="iconfont icon-plus"></text>
+            <text>添加{{item.label}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 自定义场景（可选） -->
+  <view class="form-group form-group-vertical">
+    <text class="label">自定义场景</text>
+    <textarea
+      class="textarea-input"
+      placeholder="例如：户外·湖边木栈道，黄昏，氛围灯"
+      value="{{customSceneText}}"
+      bindinput="onCustomSceneInput"
+      maxlength="500"
+      show-confirm-bar="{{false}}"
+    ></textarea>
+    <text class="tip">优先使用自定义场景；留空则使用已选卡片（{{customSceneText.length || 0}}/500字）</text>
+  </view>
+
+  <!-- 高级选项 -->
+  <view class="section">
+    <view class="section-title" bindtap="toggleAdvanced">
+      <text>高级选项</text>
+      <text class="toggle-icon {{showAdvanced ? 'expanded' : ''}}">▼</text>
+    </view>
+    
+    <view class="advanced-options {{showAdvanced ? 'show' : ''}}">
+      <view class="form-group">
+        <text class="label">服装材质</text>
+        <textarea 
+          placeholder="描述服装的整体材质特点"
+          value="{{parameters.overall_clothing_material}}"
+          data-field="overall_clothing_material"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">动作调整</text>
+        <textarea 
+          placeholder="描述希望的姿势调整"
+          value="{{parameters.pose_adjustment}}"
+          data-field="pose_adjustment"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">搭配描述</text>
+        <textarea 
+          placeholder="额外的搭配要求和描述"
+          value="{{parameters.additional_outfit_description}}"
+          data-field="additional_outfit_description"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">情绪氛围</text>
+        <textarea 
+          placeholder="描述希望的情绪和氛围"
+          value="{{parameters.mood_and_atmosphere}}"
+          data-field="mood_and_atmosphere"
+          bindinput="onTextInput"
+        />
+      </view>
+      
+      <view class="form-group">
+        <text class="label">光线风格</text>
+        <textarea 
+          placeholder="描述希望的光线和拍摄风格"
+          value="{{parameters.lighting_style}}"
+          data-field="lighting_style"
+          bindinput="onTextInput"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 拍摄场景 -->
+  <view class="section">
+    <view class="section-title">
+      <text>拍摄场景</text>
+      <text class="required">*</text>
+    </view>
+    
+    <view class="scene-grid">
+      <block wx:for="{{scenes}}" wx:key="_id">
+        <view 
+          class="scene-card {{selectedSceneId && selectedSceneId === (item._id || item.id) ? 'selected' : ''}}"
+          data-index="{{index}}"
+          data-url="{{item.thumbnail_url}}"
+          bindtap="selectScene"
+          bindlongpress="previewScene"
+        >
+          <image src="{{item.thumbnail_url}}" mode="aspectFill" lazy-load="true" />
+          <text class="scene-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="reset-btn" bindtap="resetForm">重置</button>
+    <button class="preset-btn" bindtap="openPresetModal">预设</button>
+    <button
+      class="generate-btn {{isGenerating ? 'loading' : ''}}"
+      bindtap="startGenerate"
+      disabled="{{isGenerating}}"
+    >
+      {{isGenerating ? '生成中...' : '开始试衣'}}
+    </button>
+  </view>
+
+  <!-- 使用指南弹窗 -->
+  <view class="guide-modal" wx:if="{{showGuide}}">
+    <view class="guide-mask" bindtap="closeGuide"></view>
+    <view class="guide-content">
+      <view class="guide-header">
+        <text class="guide-title">👔 AI试衣间使用指南</text>
+        <view class="guide-close" bindtap="closeGuide">✕</view>
+      </view>
+
+      <scroll-view class="guide-body" scroll-y>
+        <view class="guide-intro">
+          <text class="intro-text">AI虚拟试衣让您足不出户体验穿搭效果，告别反复试穿，2分钟看到上身效果，辅助选品决策</text>
+        </view>
+
+        <view class="guide-step">
+          <view class="step-number">1</view>
+          <view class="step-content">
+            <text class="step-title">准备个人照片</text>
+            <text class="step-desc">上传一张清晰的全身照或半身照作为试衣模特</text>
+            <view class="step-tips">
+              <text class="tip-label">照片要求：</text>
+              <text class="tip-text">• 正面拍摄，身体完整，姿势自然</text>
+              <text class="tip-text">• 光线明亮均匀，避免阴影遮挡</text>
+              <text class="tip-text">• 背景简洁，避免杂乱背景干扰</text>
+              <text class="tip-text">• 穿着贴身衣物，便于AI识别体型</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guide-step">
+          <view class="step-number">2</view>
+          <view class="step-content">
+            <text class="step-title">上传服装单品</text>
+            <text class="step-desc">选择想要试穿的服装配饰（至少上传一项）</text>
+            <view class="step-tips">
+              <text class="tip-label">搭配建议：</text>
+              <text class="tip-text">• 上衣：衬衫、T恤、卫衣、外套等</text>
+              <text class="tip-text">• 下装：牛仔裤、休闲裤、裙子、短裤等</text>
+              <text class="tip-text">• 鞋履：运动鞋、皮鞋、高跟鞋、靴子等</text>
+              <text class="tip-text">• 配饰：帽子、包包、围巾、眼镜等</text>
+              <text class="tip-text">• 可单独试穿某一件，也可组合搭配</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guide-step">
+          <view class="step-number">3</view>
+          <view class="step-content">
+            <text class="step-title">选择场景环境（可选）</text>
+            <text class="step-desc">设置试衣照背景，模拟真实穿着场景</text>
+            <view class="step-tips">
+              <text class="tip-label">场景推荐：</text>
+              <text class="tip-text">• 日常通勤：街头、办公室、咖啡厅</text>
+              <text class="tip-text">• 休闲娱乐：公园、商场、户外</text>
+              <text class="tip-text">• 运动健身：健身房、运动场、瑜伽室</text>
+              <text class="tip-text">• 也可保持原背景，更真实展示</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="guide-tips">
+          <text class="tips-title">💡 使用建议</text>
+          <text class="tips-item">• 每次生成消耗1积分，可反复调整直到满意</text>
+          <text class="tips-item">• 建议先试穿单件服装，确认效果后再组合搭配</text>
+          <text class="tips-item">• 生成时间约30-60秒，服装越多时间越长</text>
+          <text class="tips-item">• 试衣结果保存在"我的作品"，可分享或下载</text>
+          <text class="tips-item">• 适合网购选品、搭配预览、买前试穿等场景</text>
+        </view>
+      </scroll-view>
+
+      <view class="guide-footer">
+        <button class="guide-btn secondary" bindtap="closeGuide">我知道了</button>
+        <button class="guide-btn primary" bindtap="closeGuideForever">不再提示</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预设管理弹窗 -->
+  <view class="preset-modal" wx:if="{{showPresetModal}}">
+    <view class="preset-mask" bindtap="closePresetModal"></view>
+    <view class="preset-content">
+      <view class="preset-header">
+        <text class="preset-title">📋 参数预设</text>
+        <view class="preset-close" bindtap="closePresetModal">✕</view>
+      </view>
+
+      <view class="preset-body">
+        <!-- 保存当前配置 -->
+        <view class="save-preset-section">
+          <view class="save-preset-title">保存当前配置</view>
+          <view class="save-preset-input-group">
+            <input
+              class="preset-name-input"
+              placeholder="输入预设名称（如：韩系休闲风）"
+              value="{{newPresetName}}"
+              bindinput="onPresetNameInput"
+              maxlength="20"
+            />
+            <button class="save-preset-btn" bindtap="saveCurrentPreset">保存</button>
+          </view>
+        </view>
+
+        <!-- 已保存的预设列表 -->
+        <view class="preset-list-section">
+          <view class="preset-list-title">我的预设 ({{presets.length}})</view>
+
+          <scroll-view class="preset-list" scroll-y wx:if="{{presets.length > 0}}">
+            <block wx:for="{{presets}}" wx:key="id">
+              <view class="preset-item">
+                <view class="preset-item-info">
+                  <text class="preset-item-name">{{item.name}}</text>
+                  <text class="preset-item-scene" wx:if="{{item.sceneName}}">场景：{{item.sceneName}}</text>
+                  <text class="preset-item-scene" wx:elif="{{item.customSceneText}}">自定义：{{item.customSceneText}}</text>
+                </view>
+                <view class="preset-item-actions">
+                  <button class="load-preset-btn" data-index="{{index}}" bindtap="loadPreset">加载</button>
+                  <button class="delete-preset-btn" data-index="{{index}}" bindtap="deletePreset">删除</button>
+                </view>
+              </view>
+            </block>
+          </scroll-view>
+
+          <view class="preset-empty" wx:else>
+            <text class="preset-empty-text">暂无预设，保存当前配置试试吧</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 衣柜选择弹窗 -->
+  <view class="wardrobe-selector-modal" wx:if="{{showWardrobeSelector}}">
+    <view class="wardrobe-selector-mask" bindtap="closeWardrobeSelector"></view>
+    <view class="wardrobe-selector-content">
+      <view class="wardrobe-selector-header">
+        <text class="wardrobe-selector-title">👔 从衣柜选择</text>
+        <view class="wardrobe-selector-close" bindtap="closeWardrobeSelector">✕</view>
+      </view>
+
+      <scroll-view class="wardrobe-selector-list" scroll-y>
+        <block wx:for="{{wardrobeList}}" wx:key="id">
+          <view class="wardrobe-selector-item" bindtap="onWardrobeSelect" data-item="{{item}}">
+            <image class="wardrobe-item-image" src="{{item.url}}" mode="aspectFill" lazy-load="true"></image>
+            <view class="wardrobe-item-info">
+              <text class="wardrobe-item-name">{{item.name}}</text>
+              <text class="wardrobe-item-category">{{item.category === 'top' ? '上衣' : item.category === 'bottom' ? '下装' : item.category === 'dress' ? '连衣裙' : '其他'}}</text>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+  </view>
+</view>

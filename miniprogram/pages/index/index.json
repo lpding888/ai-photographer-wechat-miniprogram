@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "state": "/components/state/state"
+  },
+  "navigationBarTitleText": "AI摄影师"
+}

@@ -1,0 +1,16 @@
+{
+  "currentState": "initial",
+  "stateHistory": [
+    {
+      "from": "initial",
+      "command": "project",
+      "timestamp": "2025-09-30T08:23:31.044Z",
+      "args": [
+        {
+          "workingDirectory": "c:\\Users\\qq100\\Desktop\\迭代目录\\2.0"
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "2025-09-30T08:23:31.129Z"
+}

@@ -1,0 +1,214 @@
+<!-- 用户中心页面 -->
+<view class="container">
+  <!-- 已登录状态 -->
+  <block wx:if="{{userInfo}}">
+    <view class="user-header">
+      <!-- 使用官方 chooseAvatar 功能 -->
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      >
+        <image
+          class="avatar"
+          src="{{editAvatarUrl || userInfo.avatar_url || '/images/logo.png'}}"
+          mode="aspectFill"
+          lazy-load="true"
+        ></image>
+        <view class="avatar-mask">
+          <text class="iconfont icon-camera"></text>
+          <text>点击更换</text>
+        </view>
+      </button>
+
+      <!-- 使用官方 nickname 类型输入框 -->
+      <view class="nickname-wrapper" wx:if="{{!editingNickname}}">
+        <text class="nickname">{{userInfo.nickname || '微信用户'}}</text>
+        <button class="edit-nickname-btn" bindtap="startEditNickname">
+          <text class="iconfont icon-edit"></text>
+        </button>
+      </view>
+
+      <view class="nickname-edit" wx:else>
+        <input
+          type="nickname"
+          class="nickname-input"
+          placeholder="请输入昵称"
+          value="{{editNickname}}"
+          bindinput="onNicknameInput"
+          bindblur="finishEditNickname"
+          bindconfirm="saveNickname"
+          auto-focus="true"
+        />
+        <button class="save-btn" bindtap="saveNickname">保存</button>
+      </view>
+    </view>
+
+    <!-- 商业模式：积分信息 -->
+    <view class="user-info" wx:if="{{mode === 'commercial'}}">
+      <view class="info-item">
+        <text class="label">用户ID</text>
+        <text class="value">{{userInfo.user_id || 'N/A'}}</text>
+      </view>
+
+      <view class="info-item">
+        <text class="label">积分余额</text>
+        <view class="flex align-center">
+          <text class="value">{{userInfo.credits || 0}}</text>
+          <image class="credits-icon" src="/images/tab/works-active.png" mode="aspectFit" lazy-load="true"></image>
+        </view>
+      </view>
+
+      <view class="info-item">
+        <text class="label">注册时间</text>
+        <text class="value">{{userInfo.created_at || '未知'}}</text>
+      </view>
+    </view>
+
+    <!-- 个人模式：数据统计 -->
+    <view class="stats-card" wx:if="{{mode === 'personal'}}">
+      <view class="stat-item">
+        <text class="stat-number">{{stats.clothes}}</text>
+        <text class="stat-label">衣物</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-number">{{stats.works}}</text>
+        <text class="stat-label">作品</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-number">{{stats.memories}}</text>
+        <text class="stat-label">回忆</text>
+      </view>
+    </view>
+
+    <!-- 商业模式：充值和退出按钮 -->
+    <view class="actions" wx:if="{{mode === 'commercial'}}">
+      <button class="btn btn-primary" bindtap="goToRecharge">积分充值</button>
+      <button class="btn btn-outline" bindtap="logout">退出登录</button>
+    </view>
+
+    <!-- 商业模式：每日签到 -->
+    <view class="card" wx:if="{{mode === 'commercial'}}">
+      <view class="card-title">每日签到</view>
+      <view class="card-body">
+        <button class="btn btn-accent" bindtap="handleSignIn" disabled="{{signInToday || signing}}">
+          {{signInToday ? '今日已签' : (signing ? '签到中...' : '签到 +1')}}
+        </button>
+      </view>
+    </view>
+
+    <!-- 商业模式：每日任务 -->
+    <view class="card" wx:if="{{mode === 'commercial'}}">
+      <view class="card-title">每日任务</view>
+      <view class="card-body task-list">
+        <button class="btn btn-accent" bindtap="shareForReward">
+          分享赚积分 +2（每天3次）
+        </button>
+        <button class="btn btn-outline" open-type="share">
+          邀请好友注册 +5
+        </button>
+      </view>
+    </view>
+
+    <!-- 商业模式：充值套餐 -->
+    <view class="card" wx:if="{{mode === 'commercial'}}">
+      <view class="card-title">充值套餐</view>
+      <view class="pkg-grid">
+        <button class="pkg-item" bindtap="goToRecharge">
+          <text class="pkg-title">25张</text>
+          <text class="pkg-price">¥9.9</text>
+        </button>
+        <button class="pkg-item" bindtap="goToRecharge">
+          <text class="pkg-title">60张</text>
+          <text class="pkg-price">¥19.9</text>
+        </button>
+        <button class="pkg-item" bindtap="goToRecharge">
+          <text class="pkg-title">100张</text>
+          <text class="pkg-price">¥29.9</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 个人模式：功能入口 -->
+    <view class="card" wx:if="{{mode === 'personal'}}">
+      <view class="card-title">✨ 快捷功能</view>
+      <view class="personal-features">
+        <button class="feature-btn" bindtap="goToMemories">
+          <view class="feature-icon">💭</view>
+          <view class="feature-info">
+            <text class="feature-name">造型回忆</text>
+            <text class="feature-desc">记录精彩瞬间</text>
+          </view>
+        </button>
+        <button class="feature-btn" bindtap="goToStylingPlanner">
+          <view class="feature-icon">📅</view>
+          <view class="feature-info">
+            <text class="feature-name">造型规划</text>
+            <text class="feature-desc">规划每日穿搭</text>
+          </view>
+        </button>
+      </view>
+    </view>
+
+    <!-- 模式切换（两种模式都显示） -->
+    <view class="card">
+      <view class="card-title">🔄 模式切换</view>
+      <view class="mode-switch-content">
+        <text class="mode-hint">当前模式：{{mode === 'commercial' ? '商业拍摄' : '个人生活'}}</text>
+        <button class="btn btn-primary" bindtap="switchMode">
+          切换到{{mode === 'commercial' ? '个人生活' : '商业拍摄'}}模式
+        </button>
+      </view>
+    </view>
+
+    <!-- 商业模式：积分记录 -->
+    <view class="card" wx:if="{{mode === 'commercial'}}">
+      <view class="card-title">积分记录</view>
+      <view class="record-actions">
+        <button class="btn btn-outline small" bindtap="goToCredits">积分详情</button>
+        <button class="btn btn-outline small" data-type="recharge" bindtap="goToRecords">充值记录</button>
+        <button class="btn btn-outline small" data-type="consume" bindtap="goToRecords">消费记录</button>
+      </view>
+    </view>
+
+    <!-- 管理员专用入口 -->
+    <view class="card" wx:if="{{isAdmin}}">
+      <view class="card-title">🛠️ 管理功能</view>
+      <view class="admin-actions">
+        <button class="btn btn-primary admin-btn" bindtap="goToAdminCenter">管理中心</button>
+      </view>
+    </view>
+
+    <!-- 商业模式：帮助与反馈 -->
+    <view class="card" wx:if="{{mode === 'commercial'}}">
+      <view class="card-title">帮助与反馈</view>
+      <view class="help-actions">
+        <button class="btn btn-outline small" bindtap="goToFeedback">意见反馈</button>
+        <button class="btn btn-outline small" bindtap="contactService">联系客服</button>
+      </view>
+    </view>
+
+    <!-- 个人模式：退出登录 -->
+    <view class="logout-section" wx:if="{{mode === 'personal'}}">
+      <button class="btn btn-outline" bindtap="logout">退出登录</button>
+    </view>
+
+  </block>
+
+  <!-- 未登录状态 -->
+  <block wx:else>
+    <view class="user-header unlogged">
+      <image class="avatar pulse-animation" src="/images/logo.png" mode="aspectFill" lazy-load="true"></image>
+      <text class="nickname">未登录</text>
+      <text class="login-subtitle">登录后，让AI摄影师为你拍大片</text>
+    </view>
+    <view class="login-prompt">
+      <button class="btn btn-primary large-login" bindtap="goToLogin">
+        <text class="login-btn-icon">🚀</text>
+        <text>微信一键登录</text>
+      </button>
+    </view>
+  </block>
+</view>

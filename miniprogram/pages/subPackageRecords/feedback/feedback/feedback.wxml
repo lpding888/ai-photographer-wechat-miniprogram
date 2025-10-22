@@ -1,0 +1,164 @@
+<!-- 用户反馈页面 -->
+<view class="feedback-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">💬 意见反馈</text>
+    <text class="page-subtitle">您的建议是我们前进的动力</text>
+  </view>
+
+  <!-- 反馈类型选择 -->
+  <view class="section">
+    <view class="section-title">反馈类型</view>
+    <view class="feedback-types">
+      <view
+        class="type-item {{selectedType === item.id ? 'selected' : ''}}"
+        wx:for="{{feedbackTypes}}"
+        wx:key="id"
+        bindtap="selectFeedbackType"
+        data-type="{{item.id}}"
+      >
+        <text class="type-icon">{{item.icon}}</text>
+        <view class="type-content">
+          <text class="type-label">{{item.label}}</text>
+          <text class="type-description">{{item.description}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 反馈内容 -->
+  <view class="section">
+    <view class="section-title">详细描述</view>
+    <textarea
+      class="feedback-textarea"
+      placeholder="请详细描述您遇到的问题或建议，包括操作步骤、期望结果等..."
+      value="{{feedbackContent}}"
+      bindinput="onFeedbackInput"
+      maxlength="1000"
+      show-confirm-bar="{{false}}"
+    />
+    <view class="char-count">{{feedbackContent.length}}/1000</view>
+  </view>
+
+  <!-- 联系方式 -->
+  <view class="section">
+    <view class="section-title">联系方式 <text class="optional">(可选)</text></view>
+    <input
+      class="contact-input"
+      placeholder="微信号、手机号或邮箱，便于我们联系您"
+      value="{{contactInfo}}"
+      bindinput="onContactInput"
+      maxlength="50"
+    />
+  </view>
+
+  <!-- 附件上传 -->
+  <view class="section">
+    <view class="section-title">
+      <text>相关图片/视频</text>
+      <text class="optional">(最多{{maxAttachments}}个)</text>
+    </view>
+
+    <view class="attachments-container">
+      <!-- 已上传的附件 -->
+      <view
+        class="attachment-item"
+        wx:for="{{attachments}}"
+        wx:key="id"
+        data-index="{{index}}"
+        bindtap="previewAttachment"
+      >
+        <image
+          wx:if="{{item.type === 'image'}}"
+          class="attachment-preview"
+          src="{{item.path}}"
+          mode="aspectFill"
+        />
+        <view wx:elif="{{item.type === 'video'}}" class="attachment-preview video">
+          <text class="video-icon">🎬</text>
+          <text class="video-duration">{{item.duration}}s</text>
+        </view>
+
+        <view class="attachment-info">
+          <text class="attachment-size">{{formatFileSize(item.size)}}</text>
+        </view>
+
+        <button
+          class="remove-btn"
+          bindtap="removeAttachment"
+          data-index="{{index}}"
+          catchtap="stopPropagation"
+        >×</button>
+      </view>
+
+      <!-- 添加附件按钮 -->
+      <view
+        wx:if="{{attachments.length < maxAttachments}}"
+        class="add-attachment-btn"
+        bindtap="addAttachment"
+      >
+        <text class="add-icon">+</text>
+        <text class="add-text">添加图片/视频</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 性能数据选项 -->
+  <view class="section">
+    <view class="option-item">
+      <view class="option-content">
+        <text class="option-title">包含性能数据</text>
+        <text class="option-description">帮助我们更好地诊断性能问题</text>
+      </view>
+      <switch
+        checked="{{includePerformanceData}}"
+        bindchange="togglePerformanceData"
+        color="#667eea"
+      />
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button
+      class="submit-btn {{submitting ? 'submitting' : ''}}"
+      bindtap="submitFeedback"
+      disabled="{{submitting}}"
+    >
+      <text wx:if="{{submitting}}">提交中...</text>
+      <text wx:else>提交反馈</text>
+    </button>
+  </view>
+
+  <!-- 历史反馈 -->
+  <view class="section history-section">
+    <view class="section-title" bindtap="toggleHistory">
+      <text>历史反馈</text>
+      <text class="toggle-icon">{{showHistory ? '▼' : '▶'}}</text>
+    </view>
+
+    <view class="feedback-history" wx:if="{{showHistory}}">
+      <view
+        class="history-item"
+        wx:for="{{feedbackHistory}}"
+        wx:key="_id"
+        data-index="{{index}}"
+        bindtap="viewHistoryDetail"
+      >
+        <view class="history-header">
+          <text class="history-type">{{getFeedbackTypeInfo(item.type).label}}</text>
+          <text class="history-date">{{item.created_at}}</text>
+        </view>
+        <text class="history-content">{{item.content}}</text>
+        <view class="history-status {{item.status || 'pending'}}">
+          <text>{{item.status === 'resolved' ? '已解决' : item.status === 'in_progress' ? '处理中' : '待处理'}}</text>
+        </view>
+      </view>
+
+      <view wx:if="{{feedbackHistory.length === 0}}" class="empty-history">
+        <text class="empty-icon">📝</text>
+        <text class="empty-text">暂无历史反馈</text>
+      </view>
+    </view>
+  </view>
+</view>

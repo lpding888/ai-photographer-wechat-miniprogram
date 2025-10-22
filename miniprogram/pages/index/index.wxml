@@ -1,0 +1,94 @@
+<!-- AI摄影师首页 - 现代化设计 -->
+<view class="page-container page-fade-in">
+  <!-- 移除全屏loading遮罩，改用局部loading -->
+  <!-- 顶部状态栏占位 -->
+  <view class="status-bar"></view>
+
+  <!-- 头部区域 -->
+  <view class="header-section">
+    <view class="header-content">
+      <view class="user-area" wx:if="{{userInfo}}">
+        <view class="avatar-wrapper">
+          <image class="user-avatar" src="{{userInfo.avatar_url || '/images/default-avatar.png'}}" mode="aspectFill" lazy-load="true"></image>
+        </view>
+        <view class="user-info">
+          <text class="welcome-text">欢迎回来</text>
+          <text class="user-name">{{userInfo.nickname || '用户'}}</text>
+        </view>
+      </view>
+
+      <view class="login-area {{loading ? 'loading' : ''}}" wx:else bindtap="onLogin">
+        <view class="avatar-placeholder">
+          <text class="avatar-icon" wx:if="{{!loading}}">👤</text>
+          <view class="loading-spinner" wx:else></view>
+        </view>
+        <view class="login-prompt">
+          <text class="login-text">{{loading ? '登录中...' : '点击开始体验'}}</text>
+          <text class="login-hint" wx:if="{{!loading}}">免费体验AI摄影</text>
+        </view>
+        <view class="login-arrow" wx:if="{{!loading}}">→</view>
+      </view>
+      
+      <view class="credits-display">
+        <view class="credits-card">
+          <text class="credits-icon">💎</text>
+          <text class="credits-number">{{userInfo.credits || 0}}</text>
+          <text class="credits-label">剩余张数</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主标题区域 -->
+  <view class="title-section">
+    <text class="main-title">会说话的AI摄影师</text>
+    <text class="sub-title">对话即拍摄，专注服装展示艺术</text>
+  </view>
+
+  <!-- 主要功能卡片 -->
+  <view class="main-features">
+    <!-- 服装拍摄 -->
+    <view class="feature-card primary-card card-hover" bindtap="goToPhotography">
+      <view class="card-icon">
+        <text class="icon-text">📸</text>
+      </view>
+      <view class="card-content">
+        <text class="card-title">服装拍摄</text>
+        <text class="card-desc">上传服装平铺图，AI生成专业商业大片</text>
+      </view>
+      <view class="card-arrow">→</view>
+    </view>
+
+    <!-- 模特换装 -->
+    <view class="feature-card secondary-card card-hover" bindtap="goToFitting">
+      <view class="card-icon">
+        <text class="icon-text">👗</text>
+      </view>
+      <view class="card-content">
+        <text class="card-title">模特换装</text>
+        <text class="card-desc">为模特更换不同服装，展示试穿效果</text>
+      </view>
+      <view class="card-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 游客体验提示 -->
+  <view class="guest-experience" wx:if="{{!userInfo}}">
+    <view class="experience-text">
+      <text>🎯 游客可免费浏览功能演示</text>
+      <text class="experience-hint">登录后可生成专属AI作品</text>
+    </view>
+    <button class="secondary-login-btn btn-enhanced btn-ripple" bindtap="onLogin" loading="{{loading}}">
+      <text class="login-icon">🚀</text>
+      <text>{{loading ? '登录中...' : '免费开始创作'}}</text>
+    </button>
+  </view>
+
+
+  <!-- 底部装饰 -->
+  <view class="bottom-decoration">
+    <view class="decoration-circle circle-1"></view>
+    <view class="decoration-circle circle-2"></view>
+    <view class="decoration-circle circle-3"></view>
+  </view>
+</view>

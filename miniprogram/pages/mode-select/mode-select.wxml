@@ -1,0 +1,77 @@
+<!-- 模式选择启动页 -->
+<view class="container">
+  <!-- 顶部Logo区 -->
+  <view class="header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">AI摄影助手</text>
+    <text class="slogan">专业摄影 · 智能生活</text>
+  </view>
+
+  <!-- 模式选择卡片 -->
+  <view class="mode-cards">
+    <!-- 商业拍摄模式 -->
+    <view class="mode-card commercial" bindtap="selectCommercial">
+      <view class="card-header">
+        <view class="card-icon">📸</view>
+        <text class="card-title">商业拍摄</text>
+      </view>
+      <text class="card-desc">专业AI摄影 · 虚拟试衣 · 高清输出</text>
+      <view class="card-features">
+        <view class="feature-item">
+          <text class="feature-icon">✨</text>
+          <text class="feature-text">AI摄影</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">👗</text>
+          <text class="feature-text">虚拟试衣</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🎨</text>
+          <text class="feature-text">作品输出</text>
+        </view>
+      </view>
+      <view class="card-arrow">→</view>
+    </view>
+
+    <!-- 个人生活模式 -->
+    <view class="mode-card personal" bindtap="selectPersonal">
+      <view class="card-header">
+        <view class="card-icon">👔</view>
+        <text class="card-title">个人生活</text>
+      </view>
+      <text class="card-desc">智能衣柜 · 穿搭规划 · 旅行助手</text>
+      <view class="card-features">
+        <view class="feature-item">
+          <text class="feature-icon">🗂️</text>
+          <text class="feature-text">衣柜管理</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">📅</text>
+          <text class="feature-text">造型规划</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🪞</text>
+          <text class="feature-text">虚拟试衣</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">✈️</text>
+          <text class="feature-text">旅行助手</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">📸</text>
+          <text class="feature-text">作品回忆</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🤖</text>
+          <text class="feature-text">AI建议</text>
+        </view>
+      </view>
+      <view class="card-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="footer">
+    <text class="tip">💡 可随时在设置中切换模式</text>
+  </view>
+</view>
