@@ -1,192 +1,215 @@
-# AI生图SCF函数集合
+# AI摄影师SCF函数集合 v3.0.0
 
-## 函数概述
+## 架构概述
 
-本项目包含3个腾讯云SCF函数，用于AI生图完整流程：
+本项目基于腾讯云SCF标准架构，提供完整的AI图像生成和处理服务。
 
-### 1. ai-image-processor
-- **功能**: 图像预处理（抠图、旋转、压缩、格式转换）
-- **触发方式**: API调用
-- **运行时**: Node.js 16.13
-- **内存**: 512MB
-- **超时**: 30秒
+### 正确的调用链
+```
+前端 → server-api → BullMQ Worker → 腾讯云SCF SDK → AI服务
+```
 
-### 2. prompt-generator
+## SCF函数列表
+
+### 1. ai-image-processor (v3.0.0)
+- **功能**: 腾讯云CI图像处理和优化操作
+- **支持操作**: 压缩、调整尺寸、格式转换、水印、智能裁剪、人脸美颜、图片增强、批量处理
+- **架构**: 标准腾讯云SCF，使用tencentcloud-sdk-nodejs
+- **触发方式**: 腾讯云SDK调用
+- **运行时**: Node.js 16.13+
+- **内存**: 1024MB
+- **超时**: 120秒
+
+### 2. prompt-generator (v3.0.0)
 - **功能**: 使用混元大模型分析图片并生成AI绘画提示词
-- **触发方式**: API调用
-- **运行时**: Node.js 16.13
+- **架构**: 标准腾讯云SCF，直接调用混元API
+- **触发方式**: 腾讯云SDK调用
+- **运行时**: Node.js 16.13+
 - **内存**: 1024MB
 - **超时**: 60秒
 
-### 3. image-generator
-- **功能**: 使用豆包4.0大模型生成高质量图像
-- **触发方式**: API调用
-- **运行时**: Node.js 16.13
+### 3. image-generator (v3.0.0)
+- **功能**: 使用豆包Seedream 4.0模型生成高质量图像
+- **架构**: 标准腾讯云SCF，直接调用豆包API
+- **触发方式**: 腾讯云SDK调用
+- **运行时**: Node.js 16.13+
 - **内存**: 2048MB
 - **超时**: 300秒
 
 ## 环境变量配置
 
-### ai-image-processor
+### 统一环境变量 (所有函数)
 ```bash
-COS_SECRET_ID=your_cos_secret_id
-COS_SECRET_KEY=your_cos_secret_key
+# 腾讯云访问密钥
+TENCENTCLOUD_SECRET_ID=your_tencentcloud_secret_id
+TENCENTCLOUD_SECRET_KEY=your_tencentcloud_secret_key
+TENCENTCLOUD_REGION=ap-beijing
+
+# COS配置 (ai-image-processor)
 COS_BUCKET=your_bucket_name
-COS_REGION=ap-guangzhou
-COS_DOMAIN=custom-domain.com
 ```
 
-### prompt-generator
-```bash
-HUNYUAN_SECRET_ID=your_hunyuan_secret_id
-HUNYUAN_SECRET_KEY=your_hunyuan_secret_key
-HUNYUAN_REGION=ap-beijing
-HUNYUAN_MODEL=hunyuan-vision
+## API调用示例
+
+### ai-image-processor 调用示例
+```javascript
+const tencentcloud = require('tencentcloud-sdk-nodejs')
+const scf = new tencentcloud.SCF({...})
+
+// 压缩图片
+const compressResult = await scf.Invoke({
+  FunctionName: 'ai-image-processor',
+  Payload: JSON.stringify({
+    action: 'compressImage',
+    imageUrl: 'https://bucket.cos.region.myqcloud.com/image.jpg',
+    quality: 80
+  })
+})
+
+// 智能裁剪
+const cropResult = await scf.Invoke({
+  FunctionName: 'ai-image-processor',
+  Payload: JSON.stringify({
+    action: 'smartCrop',
+    imageUrl: 'https://bucket.cos.region.myqcloud.com/image.jpg',
+    width: 1024,
+    height: 1024,
+    scenes: '1'
+  })
+})
 ```
 
-### image-generator
-```bash
-DOUBAO_API_KEY=your_doubao_api_key
-DOUBAO_API_ENDPOINT=https://ark.cn-beijing.volces.com/api/v3
-DOUBAO_MODEL=doubao-v4
-COS_SECRET_ID=your_cos_secret_id
-COS_SECRET_KEY=your_cos_secret_key
-COS_BUCKET=your_bucket_name
-COS_REGION=ap-guangzhou
+### prompt-generator 调用示例
+```javascript
+const generatePrompt = await scf.Invoke({
+  FunctionName: 'prompt-generator',
+  Payload: JSON.stringify({
+    imageUrl: 'https://example.com/clothing.jpg',
+    clothingType: 'fashion',
+    stylePreference: 'modern',
+    sceneType: 'indoor'
+  })
+})
 ```
 
-## 部署方式
-
-### 1. 使用腾讯云控制台部署
-1. 登录腾讯云SCF控制台
-2. 创建新函数
-3. 选择"自定义创建"
-4. 上传代码zip包
-5. 配置环境变量
-6. 设置触发器（API网关触发器）
-
-### 2. 使用CLI部署
-```bash
-# 安装SCF CLI
-npm install -g @tencentcloud/scf-cli
-
-# 配置认证信息
-scf configure set --secret-id your_secret_id --secret-key your_secret_key --region ap-guangzhou
-
-# 部署函数
-scf deploy --template template.json
+### image-generator 调用示例
+```javascript
+const generateImage = await scf.Invoke({
+  FunctionName: 'image-generator',
+  Payload: JSON.stringify({
+    prompt: '一个穿着时尚服装的模特',
+    options: {
+      size: '1024x1024',
+      quality: 'standard',
+      n: 2
+    },
+    modelConfig: {
+      model: 'doubao-Seedream-4-0-250828'
+    }
+  })
+})
 ```
 
-### 3. 使用Serverless Framework
-```bash
-# 安装Serverless Framework
-npm install -g serverless
+## 响应格式
 
-# 部署
-serverless deploy
-```
-
-## 调用方式
-
-### ai-image-processor
-```json
+### 成功响应
+```javascript
 {
-  "images": ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
-  "options": {
-    "enableMatting": true,
-    "enableOrientationCorrection": true,
-    "resize": "1024x1024",
-    "quality": 0.9,
-    "format": "jpg"
-  }
-}
-```
-
-### prompt-generator
-```json
-{
-  "imageUrls": ["https://example.com/processed1.jpg"],
-  "sceneId": "scene_xxx",
-  "sceneConfig": {
-    "name": "都市街拍",
-    "category": "URBAN",
-    "promptTemplate": "现代都市街道背景..."
+  success: true,
+  data: {
+    // 具体数据内容
   },
-  "modelConfig": {
-    "height": 170,
-    "weight": 55,
-    "bodyType": "slim"
-  },
-  "generationMode": "NORMAL"
+  message: '操作成功',
+  timestamp: '2024-01-01T10:00:00.000Z',
+  version: '3.0.0',
+  request_id: 'request-id'
 }
 ```
 
-### image-generator
-```json
+### 错误响应
+```javascript
 {
-  "prompt": "详细的AI绘画提示词...",
-  "count": 4,
-  "size": "1024x1024",
-  "options": {
-    "steps": 50,
-    "cfgScale": 7.5,
-    "style": "photographic",
-    "quality": "hd"
-  }
+  success: false,
+  error: {
+    code: 'ERROR_CODE',
+    message: '错误描述',
+    type: 'ErrorType'
+  },
+  timestamp: '2024-01-01T10:00:00.000Z',
+  version: '3.0.0'
 }
 ```
 
-## 监控和日志
+## 部署说明
 
-### 日志查看
-- 腾讯云SCF控制台 → 函数管理 → 日志查询
-- 使用CloudLens进行日志聚合分析
+### 前置要求
+1. 腾讯云账号已开通SCF服务
+2. 已配置访问密钥
+3. 已创建COS存储桶（图像处理函数需要）
 
-### 性能监控
-- 监控指标：执行时间、内存使用、错误率
-- 告警配置：错误率、超时率、并发数
+### 部署步骤
+1. 通过腾讯云SCF控制台创建函数
+2. 上传对应的index.js和package.json
+3. 配置环境变量
+4. 设置内存和超时参数
+5. 测试函数功能
 
-### 成本优化
-- 配置适当的内存大小
-- 设置合理的超时时间
-- 使用预置并发减少冷启动
+## 监控和调试
 
-## 故障排除
+### 日志格式
+- 使用emoji前缀增强可读性
+- 结构化JSON输出关键信息
+- 完整的请求-响应生命周期记录
 
-### 常见问题
-1. **内存不足**: 增加内存配置或优化代码
-2. **超时**: 增加超时时间或优化处理逻辑
-3. **API调用失败**: 检查网络连接和API密钥
-4. **权限错误**: 检查IAM角色和权限配置
+### 健康检查
+每个函数都提供health_check方法：
+```javascript
+{
+  status: 'healthy',
+  function: 'function-name',
+  version: '3.0.0',
+  architecture: 'tencent_cloud_scf',
+  environment: {...},
+  timestamp: '2024-01-01T10:00:00.000Z'
+}
+```
 
-### 调试技巧
-- 使用console.log输出调试信息
-- 本地调试后再部署到SCF
-- 使用测试事件验证函数逻辑
+## 版本变更
 
-## 版本管理
+### v3.0.0 (当前版本)
+- ✅ 完全重构为腾讯云SCF标准架构
+- ✅ 移除错误的适配器模式
+- ✅ 统一使用tencentcloud-sdk-nodejs
+- ✅ 标准化main_handler入口
+- ✅ 完善的错误处理和日志记录
+- ✅ 支持action路由（多功能函数）
 
-- 使用Git进行代码版本控制
-- SCF函数版本管理
-- 灰度发布策略
+### v2.0.0 (已废弃)
+- ❌ 错误的适配器架构
+- ❌ 混合使用多种SDK
+- ❌ 复杂的目录结构
 
-## 安全考虑
+## 注意事项
 
-- API密钥使用环境变量存储
-- 启用API网关认证
-- 设置访问频率限制
-- 定期轮换密钥
+1. **不要直接从前端调用SCF函数**
+   - 必须通过server-api → BullMQ Worker → SCF的调用链
+   - 确保安全性和流量控制
 
-## 更新记录
+2. **环境变量安全**
+   - 所有密钥通过环境变量配置
+   - 不要在代码中硬编码任何密钥
 
-- v1.0.0 (2025-01-26): 初始版本发布
-  - 实现基础的图像预处理功能
-  - 集成混元大模型提示词生成
-  - 集成豆包4.0图像生成
-  - 完整的错误处理和日志记录
+3. **资源限制**
+   - 注意SCF的内存和时间限制
+   - 合理设置超时时间避免任务中断
 
-## 联系方式
+4. **错误处理**
+   - 实现完善的降级机制
+   - API失败时提供备用方案
 
-- 作者: 老王
-- 项目地址: [GitHub仓库链接]
-- 问题反馈: [Issues链接]
+---
+
+**作者**: 老王
+**架构**: 腾讯云SCF标准架构
+**版本**: 3.0.0
+**更新时间**: 2024-01-01

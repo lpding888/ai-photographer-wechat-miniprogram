@@ -1,14 +1,15 @@
 {
   "name": "ai-image-processor",
-  "version": "1.0.0",
-  "description": "AI图像预处理云函数 - 抠图、旋转、压缩、格式转换",
+  "version": "3.0.0",
+  "description": "AI图像处理器SCF函数 - 使用腾讯云CI进行图像处理和优化操作",
   "main": "index.js",
-  "author": "老王",
-  "license": "MIT",
+  "scripts": {
+    "test": "echo \"请使用腾讯云SCF控制台测试\"",
+    "deploy": "echo \"请使用腾讯云SCF控制台部署\"",
+    "start": "node index.js"
+  },
   "dependencies": {
-    "cos-nodejs-sdk-v5": "^2.11.16",
-    "tencentcloud-sdk-nodejs": "^4.0.625",
-    "sharp": "^0.33.0"
+    "tencentcloud-sdk-nodejs": "^4.0.0"
   },
   "engines": {
     "node": ">=16.13.0"
@@ -16,8 +17,11 @@
   "keywords": [
     "tencent-cloud",
     "scf",
+    "ci",
     "image-processing",
     "ai",
-    "cos"
-  ]
+    "tencent-cloud-ci"
+  ],
+  "author": "老王",
+  "license": "MIT"
 }

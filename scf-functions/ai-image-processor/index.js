@@ -1,467 +1,839 @@
 /**
- * AI图像预处理云函数
- * 功能：抠图、旋转、压缩、格式转换等图像预处理
- * 作者：老王
- * 创建时间：2025-01-26
+ * AI图像处理器 SCF函数
+ * 使用腾讯云CI进行图像处理和优化操作
+ *
+ * @author 老王
+ * @version 3.0.0 - 腾讯云SCF标准架构
  */
 
-const { COS } = require('cos-nodejs-sdk-v5')
-const crypto = require('crypto')
+'use strict'
 
-// COS客户端初始化
-const cos = new COS({
-  SecretId: process.env.COS_SECRET_ID,
-  SecretKey: process.env.COS_SECRET_KEY,
-  Domain: process.env.COS_DOMAIN || '{bucket}.cos.{region}.myqcloud.com'
+const tencentcloud = require('tencentcloud-sdk-nodejs')
+
+// 腾讯云CI服务客户端
+const ciClient = new tencentcloud.Ci({
+  credential: {
+    secretId: process.env.TENCENTCLOUD_SECRET_ID,
+    secretKey: process.env.TENCENTCLOUD_SECRET_KEY,
+  },
+  region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+  profile: {
+    httpProfile: {
+      endpoint: 'ci.tencentcloudapi.com',
+    },
+  },
 })
 
-// 腾讯云CI客户端（需要安装腾讯云CI SDK）
-const tencentcloud = require('tencentcloud-sdk-nodejs')
-const CIClient = tencentcloud.ci.v20200308.Client
-
-// 配置信息
-const CONFIG = {
-  region: process.env.COS_REGION || 'ap-guangzhou',
-  bucket: process.env.COS_BUCKET || '',
-  maxImageSize: 10 * 1024 * 1024, // 10MB
-  supportedFormats: ['jpg', 'jpeg', 'png', 'webp', 'bmp'],
-  outputQuality: 0.9,
-  maxRetries: 3
-}
-
 /**
- * 主处理函数
+ * SCF主函数
+ * @param {Object} event - 事件参数
+ * @param {Object} context - 运行上下文
+ * @returns {Promise<Object>} 处理结果
  */
-exports.main_handler = async (event, context, callback) => {
-  console.log('🚀 AI图像预处理云函数启动')
-  console.log('📥 接收到的event:', JSON.stringify(event, null, 2))
+exports.main_handler = async (event, context) => {
+  console.log('🖼️ AI图像处理器启动')
+  console.log('📥 收到事件:', JSON.stringify(event, null, 2))
+  console.log('🔧 运行环境:', JSON.stringify(context, null, 2))
 
   try {
-    // 1. 参数验证
-    const { images, options = {} } = event
+    const { action } = event
 
-    if (!images || !Array.isArray(images) || images.length === 0) {
-      throw new Error('缺少必需的images参数，必须是非空数组')
-    }
-
-    if (images.length > 10) {
-      throw new Error('最多支持同时处理10张图片')
-    }
-
-    console.log(`📷 开始处理 ${images.length} 张图片`)
-
-    // 2. 处理每张图片
-    const processedImages = []
-    const processingResults = []
-
-    for (let i = 0; i < images.length; i++) {
-      const imageUrl = images[i]
-      console.log(`🔄 处理第 ${i + 1}/${images.length} 张图片: ${imageUrl}`)
-
-      try {
-        const result = await processImage(imageUrl, options)
-        processedImages.push(result.processedImageUrl)
-        processingResults.push({
-          originalUrl: imageUrl,
-          processedUrl: result.processedImageUrl,
-          processingTime: result.processingTime,
-          operations: result.operations
-        })
-
-        console.log(`✅ 第 ${i + 1} 张图片处理完成`)
-      } catch (error) {
-        console.error(`❌ 第 ${i + 1} 张图片处理失败:`, error)
-        processingResults.push({
-          originalUrl: imageUrl,
-          error: error.message,
-          processingTime: 0
-        })
-        // 继续处理其他图片，不让单张失败影响整体
+    if (!action) {
+      return {
+        success: false,
+        error: {
+          code: 'MISSING_ACTION',
+          message: '缺少action参数'
+        }
       }
     }
 
-    // 3. 统计结果
-    const successCount = processedImages.length
-    const totalCount = images.length
-    const successRate = Math.round((successCount / totalCount) * 100)
-
-    console.log(`📊 处理完成: ${successCount}/${totalCount} 张图片成功 (${successRate}%)`)
-
-    // 4. 返回结果
-    const response = {
-      success: true,
-      data: {
-        processedImages,
-        processingResults,
-        statistics: {
-          totalCount,
-          successCount,
-          failureCount: totalCount - successCount,
-          successRate,
-          totalProcessingTime: processingResults.reduce((sum, r) => sum + (r.processingTime || 0), 0)
+    // 根据action路由到不同处理函数
+    switch (action) {
+      case 'compressImage':
+        return await compressImage(event)
+      case 'resizeImage':
+        return await resizeImage(event)
+      case 'formatConvert':
+        return await formatConvert(event)
+      case 'watermark':
+        return await watermark(event)
+      case 'smartCrop':
+        return await smartCrop(event)
+      case 'faceBeautify':
+        return await faceBeautify(event)
+      case 'imageEnhance':
+        return await imageEnhance(event)
+      case 'batchProcess':
+        return await batchProcess(event)
+      case 'getProcessStatus':
+        return await getProcessStatus(event)
+      default:
+        return {
+          success: false,
+          error: {
+            code: 'UNSUPPORTED_ACTION',
+            message: `不支持的操作: ${action}`
+          }
         }
-      },
-      message: `成功处理 ${successCount} 张图片`,
-      timestamp: new Date().toISOString()
     }
 
-    console.log('✅ AI图像预处理完成')
-    callback(null, response)
-
   } catch (error) {
-    console.error('❌ AI图像预处理失败:', error)
-
-    const errorResponse = {
+    console.error('❌ SCF函数执行失败:', error)
+    return {
       success: false,
       error: {
-        code: 'PROCESSING_ERROR',
+        code: 'SCF_EXECUTION_ERROR',
         message: error.message,
-        type: error.constructor.name
-      },
-      timestamp: new Date().toISOString()
-    }
-
-    callback(errorResponse)
-  }
-}
-
-/**
- * 处理单张图片
- */
-async function processImage(imageUrl, options) {
-  const startTime = Date.now()
-
-  try {
-    // 1. 验证和解析图片URL
-    const imageInfo = parseImageUrl(imageUrl)
-
-    // 2. 下载原图
-    const originalBuffer = await downloadImage(imageUrl)
-
-    // 3. 图片信息验证
-    await validateImage(originalBuffer)
-
-    // 4. 执行图像处理操作
-    const operations = []
-    let processedBuffer = originalBuffer
-
-    // 抠图处理（人像抠图）
-    if (options.enableMatting !== false) {
-      console.log('🎭 开始人像抠图处理...')
-      processedBuffer = await performImageMatting(processedBuffer, imageInfo.key)
-      operations.push('matting')
-    }
-
-    // 方向矫正
-    if (options.enableOrientationCorrection !== false) {
-      console.log('🔄 开始方向矫正...')
-      processedBuffer = await correctImageOrientation(processedBuffer, imageInfo.key)
-      operations.push('orientation_correction')
-    }
-
-    // 尺寸调整
-    if (options.resize) {
-      console.log('📐 开始尺寸调整...')
-      processedBuffer = await resizeImage(processedBuffer, options.resize, imageInfo.key)
-      operations.push('resize')
-    }
-
-    // 压缩优化
-    if (options.enableCompression !== false) {
-      console.log('🗜️ 开始压缩优化...')
-      processedBuffer = await compressImage(processedBuffer, options.quality || CONFIG.outputQuality, imageInfo.key)
-      operations.push('compression')
-    }
-
-    // 格式转换
-    if (options.format) {
-      console.log('🔄 开始格式转换...')
-      processedBuffer = await convertImageFormat(processedBuffer, options.format, imageInfo.key)
-      operations.push('format_conversion')
-    }
-
-    // 5. 上传处理后的图片
-    const processedImageUrl = await uploadProcessedImage(processedBuffer, imageInfo.key, options.format || 'jpg')
-
-    const processingTime = Date.now() - startTime
-    console.log(`⏱️ 图片处理耗时: ${processingTime}ms`)
-
-    return {
-      processedImageUrl,
-      processingTime,
-      operations,
-      originalSize: originalBuffer.length,
-      processedSize: processedBuffer.length,
-      compressionRatio: Math.round((1 - processedBuffer.length / originalBuffer.length) * 100)
-    }
-
-  } catch (error) {
-    console.error(`图片处理失败: ${imageUrl}`, error)
-    throw error
-  }
-}
-
-/**
- * 解析COS图片URL
- */
-function parseImageUrl(imageUrl) {
-  try {
-    // 从COS URL中提取bucket、region、key等信息
-    const url = new URL(imageUrl)
-    const hostname = url.hostname
-
-    // 解析bucket和region
-    const bucketRegionMatch = hostname.match(/^([^.]+)\.cos\.([^.]+)\.myqcloud\.com$/)
-    if (!bucketRegionMatch) {
-      throw new Error('无效的COS图片URL格式')
-    }
-
-    const [, bucket, region] = bucketRegionMatch
-    const key = decodeURIComponent(url.pathname.substring(1)) // 去掉开头的 /
-
-    return {
-      bucket,
-      region,
-      key,
-      originalUrl: imageUrl
-    }
-  } catch (error) {
-    throw new Error(`解析图片URL失败: ${error.message}`)
-  }
-}
-
-/**
- * 下载图片
- */
-async function downloadImage(imageUrl) {
-  try {
-    const response = await fetch(imageUrl, {
-      timeout: 30000, // 30秒超时
-      headers: {
-        'User-Agent': 'AI-Image-Processor/1.0'
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       }
-    })
-
-    if (!response.ok) {
-      throw new Error(`下载图片失败: HTTP ${response.status}`)
     }
-
-    const buffer = await response.buffer()
-
-    if (buffer.length > CONFIG.maxImageSize) {
-      throw new Error(`图片过大: ${buffer.length} bytes, 最大支持 ${CONFIG.maxImageSize} bytes`)
-    }
-
-    return buffer
-  } catch (error) {
-    throw new Error(`下载图片失败: ${error.message}`)
   }
 }
 
 /**
- * 验证图片格式
+ * 压缩图片
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {number} event.quality - 压缩质量 (1-100)
+ * @param {boolean} event.lossless - 是否无损压缩
+ * @returns {Promise<Object>} 压缩结果
  */
-async function validateImage(buffer) {
+async function compressImage(event) {
+  console.log('🗜️ 执行图片压缩...')
+
+  const { imageUrl, quality = 80, lossless = false } = event
+
+  if (!imageUrl) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_IMAGE_URL',
+        message: '缺少图片URL参数'
+      }
+    }
+  }
+
   try {
-    // 简单的图片格式验证
-    const signatures = {
-      'jpg': [0xFF, 0xD8, 0xFF],
-      'jpeg': [0xFF, 0xD8, 0xFF],
-      'png': [0x89, 0x50, 0x4E, 0x47],
-      'webp': [0x52, 0x49, 0x46, 0x46],
-      'bmp': [0x42, 0x4D]
+    // 腾讯云CI图片处理参数
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: `imageMogr2/quality/${quality}${lossless ? '/lossless' : ''}`
+      }
     }
 
-    let isValidFormat = false
-    let detectedFormat = null
+    console.log('📋 压缩参数:', JSON.stringify(params, null, 2))
 
-    for (const [format, signature] of Object.entries(signatures)) {
-      if (buffer.length >= signature.length &&
-          signature.every((byte, index) => buffer[index] === byte)) {
-        isValidFormat = true
-        detectedFormat = format
+    // 调用腾讯云CI图片处理接口
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 图片压缩完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          originalSize: result.OriginalSize,
+          processedSize: result.ProcessedSize,
+          compressionRatio: result.CompressionRatio,
+          quality: result.Quality,
+          format: result.Format
+        }
+      }
+    } else {
+      throw new Error('CI处理结果为空')
+    }
+
+  } catch (error) {
+    console.error('❌ 图片压缩失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'COMPRESS_ERROR',
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 调整图片尺寸
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {number} event.width - 目标宽度
+ * @param {number} event.height - 目标高度
+ * @param {string} event.mode - 调整模式 (fit/fill/crop)
+ * @returns {Promise<Object>} 调整结果
+ */
+async function resizeImage(event) {
+  console.log('📏 执行图片尺寸调整...')
+
+  const { imageUrl, width, height, mode = 'fit' } = event
+
+  if (!imageUrl || !width || !height) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_PARAMETERS',
+        message: '缺少图片URL或尺寸参数'
+      }
+    }
+  }
+
+  try {
+    // 构建CI处理规则
+    let processRule = `imageMogr2/thumbnail/${width}x${height}`
+
+    switch (mode) {
+      case 'fit':
+        processRule += '/!/'
         break
+      case 'fill':
+        processRule += '/'
+        break
+      case 'crop':
+        processRule += '/gravity/Center/crop/${width}x${height}'
+        break
+    }
+
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: processRule
       }
     }
 
-    if (!isValidFormat) {
-      throw new Error('不支持的图片格式')
+    console.log('📋 调整参数:', JSON.stringify(params, null, 2))
+
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 图片尺寸调整完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          originalSize: result.OriginalSize,
+          processedSize: result.ProcessedSize,
+          width: width,
+          height: height,
+          mode: mode
+        }
+      }
+    } else {
+      throw new Error('CI处理结果为空')
     }
 
-    console.log(`✅ 图片格式验证通过: ${detectedFormat}`)
-    return detectedFormat
   } catch (error) {
-    throw new Error(`图片验证失败: ${error.message}`)
-  }
-}
-
-/**
- * 人像抠图处理（使用腾讯云CI）
- */
-async function performImageMatting(buffer, key) {
-  try {
-    // 这里应该调用腾讯云CI的人像抠图API
-    // 由于CI SDK配置复杂，这里提供模拟实现
-
-    console.log('🎭 模拟人像抠图处理...')
-
-    // 模拟处理时间
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // 在实际实现中，这里会调用腾讯云CI的Matting接口
-    // const result = await ciClient.Matting({
-    //   Input: {
-    //     CosObject: key
-    //   }
-    // })
-
-    // 返回处理后的图片buffer（这里直接返回原buffer作为模拟）
-    return buffer
-
-  } catch (error) {
-    console.error('人像抠图处理失败:', error)
-    throw new Error(`人像抠图失败: ${error.message}`)
-  }
-}
-
-/**
- * 方向矫正
- */
-async function correctImageOrientation(buffer, key) {
-  try {
-    console.log('🔄 模拟方向矫正处理...')
-
-    // 模拟处理时间
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    // 在实际实现中，这里会调用图片处理库进行方向检测和矫正
-
-    return buffer
-  } catch (error) {
-    console.error('方向矫正失败:', error)
-    throw new Error(`方向矫正失败: ${error.message}`)
-  }
-}
-
-/**
- * 图片尺寸调整
- */
-async function resizeImage(buffer, resizeOptions, key) {
-  try {
-    console.log(`📐 调整图片尺寸: ${JSON.stringify(resizeOptions)}`)
-
-    // 模拟处理时间
-    await new Promise(resolve => setTimeout(resolve, 800))
-
-    // 在实际实现中，这里会使用sharp或jimp等图片处理库
-
-    return buffer
-  } catch (error) {
-    console.error('尺寸调整失败:', error)
-    throw new Error(`尺寸调整失败: ${error.message}`)
-  }
-}
-
-/**
- * 图片压缩
- */
-async function compressImage(buffer, quality = 0.9, key) {
-  try {
-    console.log(`🗜️ 压缩图片，质量: ${quality}`)
-
-    // 模拟处理时间
-    await new Promise(resolve => setTimeout(resolve, 600))
-
-    // 在实际实现中，这里会调用腾讯云CI的压缩接口
-    // const result = await ciClient.CompressImage({
-    //   Input: {
-    //     CosObject: key
-    //   },
-    //   Quality: Math.round(quality * 100)
-    // })
-
-    return buffer
-  } catch (error) {
-    console.error('图片压缩失败:', error)
-    throw new Error(`图片压缩失败: ${error.message}`)
+    console.error('❌ 图片尺寸调整失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'RESIZE_ERROR',
+        message: error.message
+      }
+    }
   }
 }
 
 /**
  * 格式转换
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {string} event.targetFormat - 目标格式 (webp/jpeg/png)
+ * @returns {Promise<Object>} 转换结果
  */
-async function convertImageFormat(buffer, targetFormat, key) {
+async function formatConvert(event) {
+  console.log('🔄 执行图片格式转换...')
+
+  const { imageUrl, targetFormat } = event
+
+  if (!imageUrl || !targetFormat) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_PARAMETERS',
+        message: '缺少图片URL或目标格式参数'
+      }
+    }
+  }
+
   try {
-    console.log(`🔄 转换图片格式: ${targetFormat}`)
+    const processRule = `imageMogr2/format/${targetFormat}`
 
-    // 模拟处理时间
-    await new Promise(resolve => setTimeout(resolve, 400))
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: processRule
+      }
+    }
 
-    // 在实际实现中，这里会调用腾讯云CI的格式转换接口
+    console.log('📋 转换参数:', JSON.stringify(params, null, 2))
 
-    return buffer
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 图片格式转换完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          originalFormat: result.Format,
+          targetFormat: targetFormat,
+          processedSize: result.ProcessedSize
+        }
+      }
+    } else {
+      throw new Error('CI处理结果为空')
+    }
+
   } catch (error) {
-    console.error('格式转换失败:', error)
-    throw new Error(`格式转换失败: ${error.message}`)
+    console.error('❌ 图片格式转换失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'FORMAT_CONVERT_ERROR',
+        message: error.message
+      }
+    }
   }
 }
 
 /**
- * 上传处理后的图片到COS
+ * 添加水印
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {Object} event.watermark - 水印配置
+ * @returns {Promise<Object>} 处理结果
  */
-async function uploadProcessedImage(buffer, originalKey, format) {
+async function watermark(event) {
+  console.log('💧 执行图片水印处理...')
+
+  const { imageUrl, watermark } = event
+
+  if (!imageUrl || !watermark) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_PARAMETERS',
+        message: '缺少图片URL或水印配置参数'
+      }
+    }
+  }
+
   try {
-    // 生成新的文件名
-    const timestamp = Date.now()
-    const randomString = crypto.randomBytes(4).toString('hex')
-    const originalName = originalKey.split('/').pop()
-    const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || originalName
-    const newKey = `ai-generation/processed/${timestamp}_${randomString}_${baseName}.${format}`
+    // 构建水印处理规则
+    let processRule = 'watermark/2'
 
-    console.log(`📤 上传处理后的图片: ${newKey}`)
+    if (watermark.text) {
+      processRule += `/text/${Buffer.from(watermark.text).toString('base64')}`
+      processRule += `/type/${watermark.font || 'ZHHeiTi'}`
+      processRule += `/size/${watermark.size || 20}`
+      processRule += `/color/${watermark.color || '3D3D3D'}`
+    }
 
-    return new Promise((resolve, reject) => {
-      cos.putObject({
-        Bucket: CONFIG.bucket,
-        Region: CONFIG.region,
-        Key: newKey,
-        Body: buffer,
-        ContentType: `image/${format}`,
-        CacheControl: 'max-age=31536000', // 1年缓存
-        onProgress: function(progressData) {
-          // 上传进度回调（可选）
-          const percent = Math.round(progressData.percent * 100)
-          if (percent % 10 === 0) {
-            console.log(`📊 上传进度: ${percent}%`)
-          }
+    if (watermark.position) {
+      processRule += `/gravity/${watermark.gravity || 'SouthEast'}`
+      processRule += `/dx/${watermark.dx || 10}`
+      processRule += `/dy/${watermark.dy || 10}`
+    }
+
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: processRule
+      }
+    }
+
+    console.log('📋 水印参数:', JSON.stringify(params, null, 2))
+
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 图片水印处理完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          watermarkConfig: watermark,
+          processedSize: result.ProcessedSize
         }
-      }, function(err, data) {
-        if (err) {
-          console.error('上传图片失败:', err)
-          reject(new Error(`上传图片失败: ${err.message}`))
-          return
+      }
+    } else {
+      throw new Error('CI处理结果为空')
+    }
+
+  } catch (error) {
+    console.error('❌ 图片水印处理失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'WATERMARK_ERROR',
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 智能裁剪
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {number} event.width - 目标宽度
+ * @param {number} event.height - 目标高度
+ * @param {string} event.scenes - 场景类型 (1:人脸, 2:风景)
+ * @returns {Promise<Object>} 裁剪结果
+ */
+async function smartCrop(event) {
+  console.log('✂️ 执行智能裁剪...')
+
+  const { imageUrl, width, height, scenes = '1' } = event
+
+  if (!imageUrl || !width || !height) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_PARAMETERS',
+        message: '缺少图片URL或裁剪尺寸参数'
+      }
+    }
+  }
+
+  try {
+    // 智能裁剪处理规则
+    const processRule = `smartcrop/${width}x${height}/scm/${scenes}`
+
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: processRule
+      }
+    }
+
+    console.log('📋 裁剪参数:', JSON.stringify(params, null, 2))
+
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 智能裁剪完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          cropArea: result.CropArea,
+          width: width,
+          height: height,
+          scenes: scenes
+        }
+      }
+    } else {
+      throw new Error('CI处理结果为空')
+    }
+
+  } catch (error) {
+    console.error('❌ 智能裁剪失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'SMART_CROP_ERROR',
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 人脸美颜
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {Object} event.beautifyConfig - 美颜配置
+ * @returns {Promise<Object>} 美颜结果
+ */
+async function faceBeautify(event) {
+  console.log('✨ 执行人脸美颜...')
+
+  const { imageUrl, beautifyConfig } = event
+
+  if (!imageUrl || !beautifyConfig) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_PARAMETERS',
+        message: '缺少图片URL或美颜配置参数'
+      }
+    }
+  }
+
+  try {
+    // 构建美颜处理规则
+    let processRule = 'face-beautify'
+
+    if (beautifyConfig.smoothing !== undefined) {
+      processRule += `/smoothing/${beautifyConfig.smoothing}`
+    }
+    if (beautifyConfig.whitening !== undefined) {
+      processRule += `/whitening/${beautifyConfig.whitening}`
+    }
+    if (beautifyConfig.eyeLifting !== undefined) {
+      processRule += `/eyeLifting/${beautifyConfig.eyeLifting}`
+    }
+    if (beautifyConfig.eyeEnlarging !== undefined) {
+      processRule += `/eyeEnlarging/${beautifyConfig.eyeEnlarging}`
+    }
+
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: processRule
+      }
+    }
+
+    console.log('📋 美颜参数:', JSON.stringify(params, null, 2))
+
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 人脸美颜完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          beautifyConfig: beautifyConfig,
+          processedSize: result.ProcessedSize
+        }
+      }
+    } else {
+      throw new Error('CI处理结果为空')
+    }
+
+  } catch (error) {
+    console.error('❌ 人脸美颜失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'FACE_BEAUTIFY_ERROR',
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 图片增强
+ * @param {Object} event - 事件参数
+ * @param {string} event.imageUrl - 图片URL
+ * @param {string} event.enhanceType - 增强类型 (denoise/sharpen/contrast)
+ * @param {number} event.intensity - 增强强度 (1-100)
+ * @returns {Promise<Object>} 增强结果
+ */
+async function imageEnhance(event) {
+  console.log('🔆 执行图片增强...')
+
+  const { imageUrl, enhanceType, intensity = 50 } = event
+
+  if (!imageUrl || !enhanceType) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_PARAMETERS',
+        message: '缺少图片URL或增强类型参数'
+      }
+    }
+  }
+
+  try {
+    // 构建增强处理规则
+    let processRule = 'image-enhance'
+
+    switch (enhanceType) {
+      case 'denoise':
+        processRule += `/denoise/${intensity}`
+        break
+      case 'sharpen':
+        processRule += `/sharpen/${intensity}`
+        break
+      case 'contrast':
+        processRule += `/contrast/${intensity}`
+        break
+      default:
+        throw new Error(`不支持的增强类型: ${enhanceType}`)
+    }
+
+    const params = {
+      Bucket: process.env.COS_BUCKET,
+      Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+      Key: extractCosKey(imageUrl),
+      Rule: {
+        Bucket: process.env.COS_BUCKET,
+        Region: process.env.TENCENTCLOUD_REGION || 'ap-beijing',
+        ObjectId: extractCosKey(imageUrl),
+        ProcessRule: processRule
+      }
+    }
+
+    console.log('📋 增强参数:', JSON.stringify(params, null, 2))
+
+    const response = await ciClient.ciProcessImage(params)
+
+    if (response && response.ProcessResults && response.ProcessResults.length > 0) {
+      const result = response.ProcessResults[0]
+      console.log('✅ 图片增强完成')
+
+      return {
+        success: true,
+        data: {
+          processedUrl: result.ObjectUrl,
+          enhanceType: enhanceType,
+          intensity: intensity,
+          processedSize: result.ProcessedSize
+        }
+      }
+    } else {
+      throw new Error('CI处理结果为空')
+    }
+
+  } catch (error) {
+    console.error('❌ 图片增强失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'IMAGE_ENHANCE_ERROR',
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 批量处理
+ * @param {Object} event - 事件参数
+ * @param {Array} event.imageUrls - 图片URL数组
+ * @param {Array} event.operations - 操作数组
+ * @returns {Promise<Object>} 批量处理结果
+ */
+async function batchProcess(event) {
+  console.log('📦 执行批量图片处理...')
+
+  const { imageUrls, operations } = event
+
+  if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_IMAGE_URLS',
+        message: '缺少图片URL数组参数'
+      }
+    }
+  }
+
+  if (!operations || !Array.isArray(operations) || operations.length === 0) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_OPERATIONS',
+        message: '缺少操作数组参数'
+      }
+    }
+  }
+
+  try {
+    const results = []
+
+    for (let i = 0; i < imageUrls.length; i++) {
+      const imageUrl = imageUrls[i]
+      console.log(`🔄 处理第 ${i + 1}/${imageUrls.length} 张图片`)
+
+      const imageResults = []
+
+      for (const operation of operations) {
+        const operationEvent = {
+          ...operation,
+          imageUrl: imageUrl
         }
 
-        const imageUrl = `https://${CONFIG.bucket}.cos.${CONFIG.region}.myqcloud.com/${newKey}`
-        console.log(`✅ 图片上传成功: ${imageUrl}`)
-        resolve(imageUrl)
+        let result
+        switch (operation.action) {
+          case 'compressImage':
+            result = await compressImage(operationEvent)
+            break
+          case 'resizeImage':
+            result = await resizeImage(operationEvent)
+            break
+          case 'formatConvert':
+            result = await formatConvert(operationEvent)
+            break
+          case 'watermark':
+            result = await watermark(operationEvent)
+            break
+          case 'smartCrop':
+            result = await smartCrop(operationEvent)
+            break
+          case 'faceBeautify':
+            result = await faceBeautify(operationEvent)
+            break
+          case 'imageEnhance':
+            result = await imageEnhance(operationEvent)
+            break
+          default:
+            result = {
+              success: false,
+              error: {
+                code: 'UNSUPPORTED_OPERATION',
+                message: `不支持的操作: ${operation.action}`
+              }
+            }
+        }
+
+        imageResults.push({
+          operation: operation.action,
+          result: result
+        })
+      }
+
+      results.push({
+        imageUrl: imageUrl,
+        operations: imageResults
       })
-    })
+    }
+
+    console.log('✅ 批量图片处理完成')
+
+    return {
+      success: true,
+      data: {
+        totalImages: imageUrls.length,
+        totalOperations: operations.length,
+        results: results
+      }
+    }
 
   } catch (error) {
-    console.error('上传处理后的图片失败:', error)
-    throw new Error(`上传图片失败: ${error.message}`)
+    console.error('❌ 批量图片处理失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'BATCH_PROCESS_ERROR',
+        message: error.message
+      }
+    }
   }
 }
 
 /**
- * 健康检查函数（可选）
+ * 获取处理状态
+ * @param {Object} event - 事件参数
+ * @param {string} event.taskId - 任务ID
+ * @returns {Promise<Object>} 处理状态
  */
-exports.health_check = async (event, context, callback) => {
-  callback(null, {
-    status: 'healthy',
-    function: 'ai-image-processor',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  })
+async function getProcessStatus(event) {
+  console.log('📊 获取图片处理状态...')
+
+  const { taskId } = event
+
+  if (!taskId) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_TASK_ID',
+        message: '缺少任务ID参数'
+      }
+    }
+  }
+
+  try {
+    // 这里可以从数据库或其他存储中查询任务状态
+    // 暂时返回模拟数据
+    console.log(`📋 查询任务ID: ${taskId}`)
+
+    // 实际实现中应该从数据库查询
+    const mockStatus = {
+      taskId: taskId,
+      status: 'completed', // pending/processing/completed/failed
+      progress: 100,
+      startTime: '2024-01-01T10:00:00Z',
+      endTime: '2024-01-01T10:05:00Z',
+      result: {
+        processedUrl: 'https://example.com/processed-image.jpg',
+        processedSize: 1024000
+      }
+    }
+
+    console.log('✅ 获取处理状态完成')
+
+    return {
+      success: true,
+      data: mockStatus
+    }
+
+  } catch (error) {
+    console.error('❌ 获取处理状态失败:', error)
+    return {
+      success: false,
+      error: {
+        code: 'GET_STATUS_ERROR',
+        message: error.message
+      }
+    }
+  }
+}
+
+/**
+ * 从图片URL提取COS Key
+ * @param {string} imageUrl - 图片URL
+ * @returns {string} COS Key
+ */
+function extractCosKey(imageUrl) {
+  try {
+    const url = new URL(imageUrl)
+    // 假设URL格式为 https://bucket-name.cos.region.myqcloud.com/path/to/image.jpg
+    const key = url.pathname.substring(1) // 去掉开头的 '/'
+    return decodeURIComponent(key)
+  } catch (error) {
+    console.error('❌ 提取COS Key失败:', error)
+    // 如果不是标准URL格式，直接返回原字符串
+    return imageUrl
+  }
 }

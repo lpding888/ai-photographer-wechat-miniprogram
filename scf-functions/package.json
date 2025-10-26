@@ -1,0 +1,32 @@
+{
+  "name": "@ai-photographer/scf-functions",
+  "version": "3.0.0",
+  "description": "AI摄影师微信小程序 - 腾讯云SCF函数集合",
+  "main": "index.js",
+  "scripts": {
+    "deploy:all": "echo \"请通过腾讯云SCF控制台部署各个函数\"",
+    "test": "echo \"请通过腾讯云SCF控制台测试各个函数\""
+  },
+  "keywords": [
+    "ai",
+    "photography",
+    "wechat",
+    "miniprogram",
+    "tencent-cloud",
+    "serverless",
+    "scf",
+    "hunyuan",
+    "doubao",
+    "image-generation",
+    "image-analysis",
+    "tencent-cloud-ci"
+  ],
+  "author": {
+    "name": "老王",
+    "email": "laowang@example.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.13.0"
+  }
+}
