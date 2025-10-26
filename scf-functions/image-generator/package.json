@@ -1,0 +1,23 @@
+{
+  "name": "image-generator",
+  "version": "2.0.0",
+  "description": "AI图像生成云函数 - 使用可配置适配器架构支持多种AI模型",
+  "main": "index.js",
+  "author": "老王",
+  "license": "MIT",
+  "dependencies": {
+    "tencentcloud-sdk-nodejs": "^4.0.625"
+  },
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "keywords": [
+    "tencent-cloud",
+    "scf",
+    "doubao",
+    "ai",
+    "image-generation",
+    "adapter-pattern",
+    "configurable"
+  ]
+}

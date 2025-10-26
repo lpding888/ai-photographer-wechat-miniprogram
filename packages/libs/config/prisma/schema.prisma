@@ -1,0 +1,31 @@
+model PromptTemplate {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  category    String
+  content     String
+  variables   Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ModelRegistry {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
+  provider      String
+  category      ModelCategory
+  description   String?
+  configJson    Json
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum ModelCategory {
+  MULTIMODAL
+  TEXT
+  IMAGE
+  VIDEO
+}

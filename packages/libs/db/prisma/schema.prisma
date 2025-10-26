@@ -24,8 +24,14 @@ model User {
   createdAt             DateTime        @default(now()) @map("created_at")
   updatedAt             DateTime        @updatedAt @map("updated_at")
   metadata              Json?           @map("metadata")
+  vipLevel              VipLevel        @default(FREE) @map("vip_level")
+  vipExpiredAt          DateTime?       @map("vip_expired_at")
+  identities            UserIdentity[]
   works                 Work[]
   tasks                 Task[]
+  aiFittingTasks        AIFittingTask[]
+  aiGenerationTasks     AIGenerationTask[]
+  creditRecords         CreditRecord[]
 
   @@map("users")
 }
@@ -81,4 +87,321 @@ model Task {
   @@index([workId], map: "idx_work")
   @@index([status, createdAt], map: "idx_status_created")
   @@map("tasks")
+}
+
+model UserIdentity {
+  id            String            @id @default(cuid()) @map("id")
+  userId        String            @map("user_id")
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      IdentityProvider  @map("provider")
+  identifier    String            @map("identifier")
+  verified      Boolean           @default(false) @map("verified")
+  verifiedAt    DateTime?         @map("verified_at")
+  metadata      Json?             @map("metadata")
+  boundAt       DateTime          @default(now()) @map("bound_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@unique([provider, identifier], map: "uk_provider_identifier")
+  @@index([userId], map: "idx_user_id")
+  @@map("user_identities")
+}
+
+// AI试衣任务模型
+model AIFittingTask {
+  id                  String              @id @default(cuid()) @map("id")
+  userId              String              @map("user_id")
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 输入图片
+  personImageUrl      String              @map("person_image_url")      // 人像图片URL
+  clothingImageUrl    String              @map("clothing_image_url")    // 服装图片URL
+  clothingType        ClothingType        @map("clothing_type")         // 服装类型
+
+  // 试衣场景
+  fittingScene        FittingScene        @default(STREET) @map("fitting_scene")  // 试衣场景
+  sceneConfig         Json?               @map("scene_config")           // 场景配置详情
+
+  // 生成配置
+  generateCount       Int                 @default(1) @map("generate_count")    // 生成数量
+  imageSize          String              @default("1024x1024") @map("image_size") // 图片尺寸
+  options             Json?               @map("options")               // 其他生成选项
+
+  // 处理结果
+  personAnalysis      Json?               @map("person_analysis")        // 人像分析结果
+  clothingAnalysis    Json?               @map("clothing_analysis")      // 服装分析结果
+  aiPrompt            String?             @map("ai_prompt")              // 生成的提示词
+  resultImages        Json?               @map("result_images")           // 生成结果图片URLs数组
+  processingLogs      Json?               @map("processing_logs")        // 处理日志
+
+  // 状态和进度
+  status              AIFittingStatus     @default(PENDING) @map("status")           // 详细状态
+  progress            Int                 @default(0) @map("progress")                   // 进度百分比
+  currentStep         String?             @map("current_step")                          // 当前步骤描述
+  estimatedTime       Int?                @map("estimated_time")                        // 预估剩余时间（秒）
+
+  // 错误信息
+  errorCode           String?             @map("error_code")                            // 错误代码
+  errorMessage        String?             @map("error_message")                         // 错误详情
+
+  // 积分相关
+  creditsCost         Int                 @default(0) @map("credits_cost")              // 消耗积分
+  creditsDeducted     Boolean             @default(false) @map("credits_deducted")      // 是否已扣除积分
+
+  // 时间戳
+  startedAt           DateTime?           @map("started_at")                            // 开始处理时间
+  completedAt         DateTime?           @map("completed_at")                         // 完成时间
+  cancelledAt         DateTime?           @map("cancelled_at")                         // 取消时间
+  createdAt           DateTime            @default(now()) @map("created_at")           // 创建时间
+  updatedAt           DateTime            @updatedAt @map("updated_at")               // 更新时间
+
+  // 元数据
+  metadata            Json?               @map("metadata")                              // 额外元数据
+
+  // 索引
+  @@index([userId, status], map: "idx_ai_fitting_user_status")
+  @@index([status, createdAt], map: "idx_ai_fitting_status_created")
+  @@index([fittingScene], map: "idx_ai_fitting_scene")
+  @@index([clothingType], map: "idx_ai_fitting_clothing_type")
+  @@map("ai_fitting_tasks")
+}
+
+enum IdentityProvider {
+  WECHAT_MINIAPP
+  WECHAT_OPEN
+  PHONE
+  EMAIL
+  APPLE
+  GOOGLE
+}
+
+enum VipLevel {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+// 服装类型枚举
+enum ClothingType {
+  TOP        // 上装
+  BOTTOM     // 下装
+  DRESS      // 连衣裙
+  FULL_BODY  // 全套服装
+}
+
+// 试衣场景枚举
+enum FittingScene {
+  STREET     // 街头场景
+  OFFICE     // 办公室场景
+  DATE       // 约会场景
+  FITNESS    // 健身场景
+  HOME       // 居家场景
+}
+
+// AI生图任务模型（通用服装摄影生成）
+model AIGenerationTask {
+  id                  String              @id @default(cuid()) @map("id")
+  userId              String              @map("user_id")
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 输入参数
+  sourceImages        Json                @map("source_images")           // 原始上传图片URLs数组
+  sceneId             String              @map("scene_id")                // 场景配置ID
+  modelConfig         Json?               @map("model_config")            // 模特参数配置（身高、体重、体型等）
+
+  // 生成配置
+  generationMode      GenerationMode      @default(NORMAL) @map("generation_mode") // 生成模式
+  generateCount       Int                 @default(4) @map("generate_count")        // 生成数量
+  imageSize           String              @default("1024x1024") @map("image_size")  // 图片尺寸
+  options             Json?               @map("options")                  // 其他生成选项
+
+  // 处理过程数据
+  processedImages     Json?               @map("processed_images")        // 预处理后的图片URLs
+  generatedPrompt     String?             @map("generated_prompt")        // AI生成的提示词
+  imageAnalysis       Json?               @map("image_analysis")          // 图片分析结果
+  processingLogs      Json?               @map("processing_logs")         // 处理日志
+
+  // 生成结果
+  resultImages        Json?               @map("result_images")           // 生成结果图片URLs数组
+  resultMetadata      Json?               @map("result_metadata")         // 生成结果元数据
+
+  // 状态和进度
+  status              AIGenerationStatus  @default(PENDING) @map("status")          // 详细状态
+  progress            Int                 @default(0) @map("progress")               // 进度百分比 0-100
+  currentStep         String?             @map("current_step")                      // 当前步骤描述
+  estimatedTime       Int?                @map("estimated_time")                    // 预估剩余时间（秒）
+
+  // 错误信息
+  errorCode           String?             @map("error_code")                        // 错误代码
+  errorMessage        String?             @map("error_message")                     // 错误详情
+  retryCount          Int                 @default(0) @map("retry_count")            // 重试次数
+
+  // 积分相关
+  creditsCost         Int                 @default(0) @map("credits_cost")           // 消耗积分
+  creditsDeducted     Boolean             @default(false) @map("credits_deducted")   // 是否已扣除积分
+  creditsRefunded     Boolean             @default(false) @map("credits_refunded")   // 是否已退还积分
+
+  // 关联数据
+  referenceWorkId     String?             @map("reference_work_id")        // 姿势裂变参考作品ID
+  queueJobId          String?             @map("queue_job_id")             // BullMQ队列任务ID
+
+  // 时间戳
+  startedAt           DateTime?           @map("started_at")               // 开始处理时间
+  completedAt         DateTime?           @map("completed_at")             // 完成时间
+  cancelledAt         DateTime?           @map("cancelled_at")             // 取消时间
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  // 元数据
+  metadata            Json?               @map("metadata")                 // 额外元数据
+
+  // 关联
+  scene               Scene               @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  // 索引
+  @@index([userId, status], map: "idx_ai_gen_user_status")
+  @@index([status, createdAt], map: "idx_ai_gen_status_created")
+  @@index([sceneId], map: "idx_ai_gen_scene")
+  @@index([generationMode], map: "idx_ai_gen_mode")
+  @@index([queueJobId], map: "idx_ai_gen_queue_job")
+  @@index([referenceWorkId], map: "idx_ai_gen_ref_work")
+  @@map("ai_generation_tasks")
+}
+
+// AI生图场景配置表
+model Scene {
+  id                String            @id @default(cuid()) @map("id")
+  name              String            @map("name")                        // 场景名称
+  description       String?           @map("description")                 // 场景描述
+  category          SceneCategory     @map("category")                    // 场景分类
+  type              SceneType         @default(PHOTOGRAPHY) @map("type")  // 场景类型
+
+  // 场景配置
+  promptTemplate    String            @map("prompt_template")             // 提示词模板
+  negativePrompt    String?           @map("negative_prompt")             // 负面提示词
+  sceneConfig       Json?             @map("scene_config")                // 场景配置详情
+
+  // 视觉配置
+  previewImage      String?           @map("preview_image")               // 预览图URL
+  thumbnailImage    String?           @map("thumbnail_image")             // 缩略图URL
+  styleTags         Json?             @map("style_tags")                  // 风格标签数组
+
+  // 生成参数
+  defaultParams     Json?             @map("default_params")              // 默认生成参数
+  supportedSizes    Json?             @map("supported_sizes")             // 支持的图片尺寸
+  maxGenerateCount  Int               @default(4) @map("max_generate_count") // 最大生成数量
+
+  // 积分配置
+  creditsPerImage   Int               @default(10) @map("credits_per_image") // 每张图片积分消耗
+  baseCredits       Int               @default(20) @map("base_credits")      // 基础积分消耗
+
+  // 状态控制
+  isActive          Boolean           @default(true) @map("is_active")      // 是否启用
+  isPremium         Boolean           @default(false) @map("is_premium")    // 是否为高级场景
+  sortOrder         Int               @default(0) @map("sort_order")        // 排序权重
+
+  // 使用统计
+  usageCount        Int               @default(0) @map("usage_count")       // 使用次数
+  likeCount         Int               @default(0) @map("like_count")        // 点赞次数
+
+  // 时间戳
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  // 关联
+  aiGenerationTasks AIGenerationTask[]
+
+  // 索引
+  @@index([category, isActive], map: "idx_scene_category_active")
+  @@index([type, isActive], map: "idx_scene_type_active")
+  @@index([sortOrder], map: "idx_scene_sort")
+  @@index([usageCount], map: "idx_scene_usage")
+  @@map("scenes")
+}
+
+// AI试衣状态枚举（扩展通用状态）
+enum AIFittingStatus {
+  PENDING      // 等待处理
+  PREPROCESSING // 图像预处理中
+  GENERATING_PROMPT // 生成提示词中
+  GENERATING_IMAGE // 生成图片中
+  PROCESSING   // 后处理中
+  COMPLETED    // 已完成
+  FAILED       // 失败
+  CANCELLED    // 已取消
+}
+
+// AI生图状态枚举
+enum AIGenerationStatus {
+  PENDING            // 等待处理
+  PREPROCESSING      // 图像预处理中
+  GENERATING_PROMPT  // 生成提示词中（混元分析）
+  GENERATING_IMAGE   // 生成图片中（豆包生成）
+  POSTPROCESSING     // 后处理中
+  COMPLETED          // 已完成
+  FAILED             // 失败
+  CANCELLED          // 已取消
+  TIMEOUT            // 超时
+}
+
+// 生成模式枚举
+enum GenerationMode {
+  NORMAL            // 正常模式
+  POSE_VARIATION    // 姿势裂变模式
+  STYLE_TRANSFER    // 风格迁移模式
+  ENHANCEMENT       // 图像增强模式
+}
+
+// 场景分类枚举
+enum SceneCategory {
+  URBAN           // 城市场景
+  NATURE          // 自然场景
+  INDOOR          // 室内场景
+  LIFESTYLE       // 生活场景
+  COMMERCIAL      // 商业场景
+  ARTISTIC        // 艺术场景
+  SEASONAL        // 季节场景
+}
+
+// 场景类型枚举
+enum SceneType {
+  PHOTOGRAPHY     // 摄影场景
+  FITTING         // 试衣场景
+  LIFESTYLE       // 生活场景
+}
+
+// 积分记录模型
+model CreditRecord {
+  id            String    @id @default(cuid()) @map("id")
+  userId        String    @map("user_id")
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 记录信息
+  type          String    @map("type")                    // 类型: ai_generation, ai_fitting, daily_checkin, recharge, refund, signup_bonus等
+  amount        Int       @map("amount")                  // 积分数量（正数为收入，负数为支出）
+  description   String    @map("description")             // 描述
+
+  // 关联信息
+  orderId       String?   @map("order_id")               // 关联订单ID
+  workId        String?   @map("work_id")                // 关联作品ID
+  taskId        String?   @map("task_id")                // 关联任务ID
+  sceneId       String?   @map("scene_id")               // 关联场景ID
+
+  // 余额信息
+  balanceAfter  Int       @map("balance_after")           // 操作后余额
+
+  // 时间戳
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // 元数据
+  metadata      Json?     @map("metadata")               // 额外数据
+
+  // 索引
+  @@index([userId, createdAt], map: "idx_credit_user_created")
+  @@index([type, createdAt], map: "idx_credit_type_created")
+  @@index([taskId], map: "idx_credit_task")
+  @@index([orderId], map: "idx_credit_order")
+  @@index([workId], map: "idx_credit_work")
+  @@map("credit_records")
 }

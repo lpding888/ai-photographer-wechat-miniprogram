@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ai-photographer/config": ["../../packages/libs/config/src"],
+      "@ai-photographer/db": ["../../packages/libs/db/src"]
+    },
+    "moduleResolution": "node",
+    "module": "commonjs"
+  },
+  "references": [
+    { "path": "../../packages/libs/config" },
+    { "path": "../../packages/libs/db" }
+  ],
+  "include": ["src", "tests"]
+}

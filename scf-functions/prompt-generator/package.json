@@ -1,0 +1,27 @@
+{
+  "name": "prompt-generator",
+  "version": "2.0.0",
+  "description": "AI提示词生成云函数 - 使用可配置适配器架构支持多种AI模型",
+  "main": "index.js",
+  "author": "老王",
+  "license": "MIT",
+  "dependencies": {
+    "tencentcloud-sdk-nodejs": "^4.0.625",
+    "tencentcloud-sdk-nodejs-hunyuan": "^1.0.1",
+    "@tencentcloud/tcb-nodejs": "^1.8.2"
+  },
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "keywords": [
+    "tencent-cloud",
+    "scf",
+    "hunyuan",
+    "doubao",
+    "ai",
+    "prompt-generation",
+    "image-analysis",
+    "adapter-pattern",
+    "configurable"
+  ]
+}

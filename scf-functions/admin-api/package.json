@@ -1,0 +1,21 @@
+{
+  "name": "admin-api",
+  "version": "1.0.0",
+  "description": "AI模型配置管理API - 提供后端管理页面接口",
+  "main": "index.js",
+  "author": "老王",
+  "license": "MIT",
+  "dependencies": {
+    "tencentcloud-sdk-nodejs": "^4.0.625"
+  },
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "keywords": [
+    "tencent-cloud",
+    "scf",
+    "admin",
+    "config-management",
+    "ai-models"
+  ]
+}

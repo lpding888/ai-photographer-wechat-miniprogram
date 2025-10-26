@@ -1,0 +1,25 @@
+{
+    "name":  "@ai-photographer/config-service",
+    "version":  "0.0.1",
+    "private":  true,
+    "type":  "module",
+    "main":  "dist/index.js",
+    "scripts":  {
+                    "dev":  "tsx watch src/index.ts",
+                    "build":  "tsc --build",
+                    "start":  "node dist/index.js",
+                    "prisma:generate":  "prisma generate",
+                    "prisma:migrate":  "prisma migrate dev"
+                },
+    "dependencies":  {
+                         "@ai-photographer/db":  "workspace:*",
+                         "fastify":  "^5.0.0",
+                         "@prisma/client":  "^6.18.0",
+                         "zod":  "^3.23.8",
+                         "dotenv":  "^16.4.5"
+                     },
+    "devDependencies":  {
+                            "tsx":  "^4.19.2",
+                            "prisma":  "^6.18.0"
+                        }
+}

@@ -1,0 +1,32 @@
+{
+    "name": "@ai-photographer/server-api",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "tsx src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@ai-photographer/config": "workspace:*",
+        "@ai-photographer/db": "workspace:*",
+        "@ai-photographer/tencent-scf": "workspace:*",
+        "bullmq": "^5.10.4",
+        "fastify": "^5.0.0",
+        "fastify-plugin": "^5.1.0",
+        "ioredis": "^5.4.1",
+        "jsonwebtoken": "^9.0.2",
+        "pino": "^9.3.2",
+        "pino-pretty": "^11.2.2",
+        "tencentcloud-sdk-nodejs": "^4.1.135",
+        "uuid": "^13.0.0"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^22.9.1",
+        "@types/uuid": "^11.0.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3"
+    }
+}

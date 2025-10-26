@@ -1,0 +1,23 @@
+[
+  {
+    "id": "cls_test_1_1729774521000_a1b2c3d4e5",
+    "chunk": "{\"level\":\"info\",\"time\":1729774521000,\"pid\":3704,\"hostname\":\"DESKTOP-ABC123\",\"msg\":\"测试日志消息1 - 模拟CLS推送失败\"}",
+    "timestamp": 1729774521000,
+    "retryCount": 0,
+    "nextRetryTime": 1729774522000
+  },
+  {
+    "id": "cls_test_2_1729774521500_f6g7h8i9j0",
+    "chunk": "{\"level\":\"error\",\"time\":1729774521500,\"pid\":3704,\"hostname\":\"DESKTOP-ABC123\",\"msg\":\"测试错误日志消息2 - 模拟CLS推送失败\",\"err\":{\"message\":\"模拟错误\",\"stack\":\"Error: 模拟错误\\n    at test (test.js:1:1)\"}}",
+    "timestamp": 1729774521500,
+    "retryCount": 1,
+    "nextRetryTime": 1729774523000
+  },
+  {
+    "id": "cls_test_3_1729774522000_k1l2m3n4o5",
+    "chunk": "{\"level\":\"warn\",\"time\":1729774522000,\"pid\":3704,\"hostname\":\"DESKTOP-ABC123\",\"msg\":\"测试警告日志消息3 - 模拟CLS推送失败\"}",
+    "timestamp": 1729774522000,
+    "retryCount": 0,
+    "nextRetryTime": 1729774522500
+  }
+]

@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./test.db"
+}
+
+model User {
+  id                    String          @id @map("id")
+  nickname              String?         @map("nickname")
+  avatarUrl             String?         @map("avatar_url")
+  status                String          @default("active") @map("status")
+  credits               Int             @default(0) @map("credits")
+  totalCredits          Int             @default(0) @map("total_credits")
+  totalConsumedCredits  Int             @default(0) @map("total_consumed_credits")
+  totalEarnedCredits    Int             @default(0) @map("total_earned_credits")
+  registerTime          DateTime?       @map("register_time")
+  lastLoginTime         DateTime?       @map("last_login_time")
+  lastCheckinDate       DateTime?       @map("last_checkin_date")
+  inviteCode            String?         @map("invite_code")
+  invitedBy             String?         @map("invited_by")
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+  metadata              Json?
+  vipLevel              VipLevel        @default(FREE) @map("vip_level")
+  vipExpiredAt          DateTime?       @map("vip_expired_at")
+  identities            UserIdentity[]
+  works                 Work[]
+  tasks                 Task[]
+
+  @@map("users")
+}
+
+model Work {
+  id          String       @id @default(cuid()) @map("id")
+  userId      String       @map("user_id")
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String       @map("type")
+  status      String       @map("status")
+  title       String?      @map("title")
+  isFavorite  Boolean      @default(false) @map("is_favorite")
+  taskId      String?      @map("task_id")
+  metadata    Json?        @map("metadata")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  images      WorkImage[]
+  tasks       Task[]
+
+  @@index([userId, createdAt, id], map: "idx_user_created_id_desc")
+  @@index([taskId], map: "idx_task_id")
+  @@map("works")
+}
+
+model WorkImage {
+  id        String   @id @default(cuid()) @map("id")
+  workId    String   @map("work_id")
+  work      Work     @relation(fields: [workId], references: [id], onDelete: Cascade)
+  url       String   @map("url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([workId, sortOrder], map: "idx_work_sort")
+  @@map("work_images")
+}
+
+model Task {
+  id          String   @id @default(cuid()) @map("id")
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workId      String?  @map("work_id")
+  work        Work?    @relation(fields: [workId], references: [id], onDelete: SetNull)
+  type        String   @map("type") // photography, fitting, personal
+  status      String   @map("status") // pending, processing, completed, failed, cancelled
+  progress    Int      @default(0) @map("progress") // 0-100
+  metadata    Json?    @map("metadata")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  cancelledAt DateTime? @map("cancelled_at")
+
+  @@index([userId, status], map: "idx_user_status")
+  @@index([workId], map: "idx_work")
+  @@index([status, createdAt], map: "idx_status_created")
+  @@map("tasks")
+}
+
+model UserIdentity {
+  id            String            @id @default(cuid()) @map("id")
+  userId        String            @map("user_id")
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      IdentityProvider  @map("provider")
+  identifier    String            @map("identifier")
+  verified      Boolean           @default(false) @map("verified")
+  verifiedAt    DateTime?         @map("verified_at")
+  metadata      Json?             @map("metadata")
+  boundAt       DateTime          @default(now()) @map("bound_at")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@unique([provider, identifier], map: "uk_provider_identifier")
+  @@index([userId], map: "idx_user_id")
+  @@map("user_identities")
+}
+
+enum IdentityProvider {
+  WECHAT_MINIAPP
+  WECHAT_OPEN
+  PHONE
+  EMAIL
+  APPLE
+  GOOGLE
+}
+
+enum VipLevel {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}

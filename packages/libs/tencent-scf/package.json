@@ -1,0 +1,40 @@
+{
+  "name": "@ai-photographer/tencent-scf",
+  "version": "1.0.0",
+  "description": "Tencent Cloud SCF (Serverless Cloud Function) client wrapper for AI Photographer",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "keywords": [
+    "tencent-cloud",
+    "scf",
+    "serverless",
+    "cloud-function",
+    "ai-photographer"
+  ],
+  "author": "AI Photographer Team",
+  "license": "MIT",
+  "dependencies": {
+    "tencentcloud-sdk-nodejs-scf": "^4.1.71",
+    "pino": "^9.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

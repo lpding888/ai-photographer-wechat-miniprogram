@@ -1,0 +1,169 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { legacyUsersService } from '../src/services/legacy/users.service.js'
+import { legacyWorksService } from '../src/services/legacy/works.service.js'
+import { buildApp } from '../src/utils/app.js'
+
+const mockWorks = [
+  {
+    id: 'w1',
+    userId: 'user-demo-1',
+    title: '摄影 A',
+    type: 'photography',
+    status: 'completed',
+    is_favorite: true,
+    cover_url: 'https://example.com/a.jpg',
+    created_time: new Date().toISOString(),
+    display_time: new Date().toISOString(),
+  },
+]
+
+beforeEach(() => {
+  vi.restoreAllMocks()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+describe('legacy actions', () => {
+  it('should reject missing action', async () => {
+    const app = buildApp()
+    await app.ready()
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/legacy/actions',
+      payload: {},
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toMatchObject({ success: false, message: '缺少 action 参数' })
+
+    await app.close()
+  })
+
+  it('should require user id for protected actions', async () => {
+    const app = buildApp()
+    await app.ready()
+
+    vi.spyOn(legacyWorksService, 'listWorks').mockResolvedValue({ items: [], nextCursor: undefined })
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/legacy/actions',
+      payload: { action: 'listWorks' },
+    })
+
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toMatchObject({ success: false, message: '用户未登录' })
+
+    await app.close()
+  })
+
+  it('should list works for legacy user', async () => {
+    const app = buildApp()
+    await app.ready()
+
+    vi.spyOn(legacyWorksService, 'listWorks').mockResolvedValue({ items: mockWorks, nextCursor: undefined })
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/legacy/actions',
+      payload: { action: 'listWorks', userId: 'user-demo-1', pageSize: 10 },
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toMatchObject({ success: true, message: '获取作品列表成功' })
+    expect(legacyWorksService.listWorks).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-demo-1', pageSize: 10 }),
+    )
+
+    await app.close()
+  })
+
+  it('should update preferences successfully', async () => {
+    const app = buildApp()
+    await app.ready()
+
+    vi.spyOn(legacyUsersService, 'updateUserPreferences').mockReturnValue({
+      id: 'user-demo-1',
+      preferences: { default_gender: 'male', notification_enabled: false },
+    })
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/legacy/actions',
+      payload: {
+        action: 'updateUserPreferences',
+        userId: 'user-demo-1',
+        preferences: {
+          default_gender: 'male',
+          notification_enabled: false,
+          ignored_field: 'xxx',
+        },
+      },
+    })
+
+    expect(response.statusCode).toBe(200)
+    const body = response.json()
+    expect(body.success).toBe(true)
+    expect(body.data.preferences.default_gender).toBe('male')
+    expect(body.data.preferences.notification_enabled).toBe(false)
+    expect(body.data.preferences).not.toHaveProperty('ignored_field')
+    expect(legacyUsersService.updateUserPreferences).toHaveBeenCalled()
+
+    await app.close()
+  })
+
+  it('should provide user stats', async () => {
+    const app = buildApp()
+    await app.ready()
+
+    vi.spyOn(legacyUsersService, 'getUserStats').mockReturnValue({
+      user_info: { id: 'user-demo-1' },
+      work_stats: { total: 1 },
+      credit_stats: { current_credits: 0, total_earned: 0, total_consumed: 0 },
+    })
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/legacy/actions',
+      payload: {
+        action: 'getUserStats',
+        userId: 'user-demo-1',
+      },
+    })
+
+    expect(response.statusCode).toBe(200)
+    const body = response.json()
+    expect(body.success).toBe(true)
+    expect(body.data.work_stats.total).toBeGreaterThan(0)
+    expect(legacyUsersService.getUserStats).toHaveBeenCalledWith('user-demo-1')
+
+    await app.close()
+  })
+
+  it('should cancel task when available', async () => {
+    const app = buildApp()
+    await app.ready()
+
+    vi.spyOn(legacyWorksService, 'cancelTask').mockResolvedValue(true)
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/legacy/actions',
+      payload: {
+        action: 'cancelTask',
+        userId: 'user-demo-1',
+        task_id: 'task-demo-2',
+      },
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toMatchObject({ success: true, message: '任务已取消' })
+    expect(legacyWorksService.cancelTask).toHaveBeenCalledWith('task-demo-2', 'user-demo-1')
+
+    await app.close()
+  })
+})

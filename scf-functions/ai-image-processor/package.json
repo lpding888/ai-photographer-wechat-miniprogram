@@ -1,0 +1,23 @@
+{
+  "name": "ai-image-processor",
+  "version": "1.0.0",
+  "description": "AI图像预处理云函数 - 抠图、旋转、压缩、格式转换",
+  "main": "index.js",
+  "author": "老王",
+  "license": "MIT",
+  "dependencies": {
+    "cos-nodejs-sdk-v5": "^2.11.16",
+    "tencentcloud-sdk-nodejs": "^4.0.625",
+    "sharp": "^0.33.0"
+  },
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "keywords": [
+    "tencent-cloud",
+    "scf",
+    "image-processing",
+    "ai",
+    "cos"
+  ]
+}

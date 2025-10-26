@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/libs/config" },
+    { "path": "./packages/libs/db" },
+    { "path": "./packages/config-service" },
+    { "path": "./apps/server-api" },
+    { "path": "./apps/server-jobs" }
+  ]
+}

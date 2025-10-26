@@ -1,0 +1,53 @@
+{
+    "name": "ai-photographer-platform",
+    "private": true,
+    "version": "0.0.1",
+    "description": "Monorepo for AI Photographer back-end refactor",
+    "packageManager": "pnpm@10.19.0",
+    "engines": {
+        "node": ">=20.18.0"
+    },
+    "scripts": {
+        "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
+        "format": "prettier --check .",
+        "typecheck": "tsc -b tsconfig.json",
+        "test": "vitest run --passWithNoTests",
+        "test:integration": "vitest run apps/server-api/tests/legacy-integration.test.ts",
+        "test:queue": "vitest run apps/server-api/tests/queue-service.test.ts",
+        "test:e2e": "node scripts/e2e-smoke-test.js",
+        "setup:test": "powershell -ExecutionPolicy Bypass -File scripts/setup-test-env.ps1",
+        "cleanup:test": "powershell -ExecutionPolicy Bypass -File scripts/setup-test-env.ps1 -Clean",
+        "dev:api": "pnpm --filter @ai-photographer/server-api dev",
+        "dev:config": "pnpm --filter @ai-photographer/config-service dev",
+        "dev:admin": "pnpm --filter @ai-photographer/admin-console dev",
+        "dev:jobs": "pnpm --filter @ai-photographer/server-jobs dev",
+        "dev:all": "concurrently \"pnpm dev:api\" \"pnpm dev:config\" \"pnpm dev:admin\" \"pnpm dev:jobs\"",
+        "test:scf": "node scripts/test-scf-connectivity.js",
+        "test:scf:api": "node apps/server-api/scripts/test-cloud-function-service.js",
+        "test:scf:jobs": "node apps/server-jobs/scripts/test-cloud-function-worker.js",
+        "test:scf:all": "node scripts/test-all-scf.js"
+    },
+    "devDependencies": {
+        "@prisma/client": "^6.18.0",
+        "@types/node": "^22.18.12",
+        "@typescript-eslint/eslint-plugin": "^8.46.2",
+        "@typescript-eslint/parser": "^8.46.2",
+        "concurrently": "^8.2.2",
+        "dotenv": "^16.4.5",
+        "eslint": "^8.57.1",
+        "eslint-config-prettier": "^9.1.2",
+        "eslint-import-resolver-typescript": "^3.10.1",
+        "eslint-plugin-import": "^2.32.0",
+        "prettier": "^3.6.2",
+        "prisma": "^6.18.0",
+        "supertest": "^7.1.4",
+        "typescript": "^5.9.3",
+        "vite-tsconfig-paths": "^5.1.4",
+        "vitest": "^4.0.2"
+    },
+    "dependencies": {
+        "bullmq": "^5.61.2",
+        "fastify": "^5.6.1",
+        "ioredis": "^5.8.2"
+    }
+}

@@ -1,0 +1,133 @@
+import { appConfig } from '../../config.js'
+import { computeHmacSha256 } from '../../utils/hmac.js'
+import { legacyError, legacySuccess, type LegacyResponse } from '../../utils/legacy-response.js'
+
+import { callbacksRepository } from './callback-repository.js'
+import { publishCallbackEvent } from './notification.js'
+
+const FALLBACK_SECRET = 'replace-me'
+
+const getScfConfig = () => {
+  return appConfig.callbacks?.scf ?? {
+    secret: FALLBACK_SECRET,
+    cos: {
+      validate: false,
+      baseUrl: null,
+    },
+  }
+}
+
+interface CosObjectInfo {
+  key: string
+  bucket: string
+  region: string
+  etag?: string
+  size?: number
+}
+
+export interface ScfCallbackPayload {
+  eventId: string
+  taskId: string
+  status: 'SUCCESS' | 'FAILED' | 'RETRYING'
+  outputKeys: string[]
+  cosObject: CosObjectInfo
+  metadata?: Record<string, unknown>
+}
+
+export const verifySignature = (body: unknown, signature: string | undefined): boolean => {
+  if (!signature) {
+    return false
+  }
+
+  const secret = getScfConfig().secret
+  const payload = JSON.stringify(body ?? {})
+  const expected = computeHmacSha256(payload, secret)
+  return expected === signature
+}
+
+const isCosObjectInfoValid = (info: CosObjectInfo) =>
+  Boolean(info?.key && info?.bucket && info?.region)
+
+const validateCosObject = async (info: CosObjectInfo): Promise<boolean> => {
+  const config = getScfConfig().cos
+  if (!config.validate || !config.baseUrl) {
+    return true
+  }
+
+  try {
+    console.debug('[callback] COS 校验', info.key, config.baseUrl)
+    const url = new URL(info.key.replace(/^\//, ''), config.baseUrl.endsWith('/') ? config.baseUrl : `${config.baseUrl}/`)
+    const response = await fetch(url, { method: 'HEAD' })
+    if (!response.ok) {
+      throw new Error(`COS 对象校验失败: ${response.status}`)
+    }
+
+    if (info.etag) {
+      const responseEtag = response.headers.get('etag')?.replace(/"/g, '')
+      if (responseEtag && responseEtag !== info.etag) {
+        throw new Error('COS 对象 etag 不匹配')
+      }
+    }
+
+    if (typeof info.size === 'number') {
+      const contentLength = Number(response.headers.get('content-length'))
+      if (Number.isFinite(contentLength) && contentLength !== info.size) {
+        throw new Error('COS 对象 size 不匹配')
+      }
+    }
+
+    return true
+  } catch (error) {
+    console.error('[callback] COS 校验失败', error)
+    return false
+  }
+}
+
+export const handleScfCallback = async (
+  payload: ScfCallbackPayload,
+): Promise<LegacyResponse<{ received: true } | { duplicate: true }>> => {
+  if (!payload?.eventId || !payload?.taskId) {
+    return legacyError('缺少 eventId 或 taskId', 400)
+  }
+
+  if (!isCosObjectInfoValid(payload.cosObject)) {
+    return legacyError('COS 对象信息不完整', 400)
+  }
+
+  if (callbacksRepository.has(payload.eventId)) {
+    return legacySuccess(
+      { duplicate: true },
+      '回调已处理（重复事件忽略）',
+      200,
+    )
+  }
+
+  const cosValid = await validateCosObject(payload.cosObject)
+  if (!cosValid) {
+    return legacyError('COS 校验失败', 422)
+  }
+
+  try {
+    callbacksRepository.save({
+      eventId: payload.eventId,
+      taskId: payload.taskId,
+      status: payload.status,
+      cosKey: payload.cosObject.key,
+      receivedAt: new Date().toISOString(),
+      rawPayload: payload,
+    })
+
+    await publishCallbackEvent({
+      eventId: payload.eventId,
+      taskId: payload.taskId,
+      status: payload.status,
+    })
+  } catch (error) {
+    console.error('[callback] 回调入库或通知失败', error)
+    return legacyError('回调持久化失败', 500, {
+      reason: error instanceof Error ? error.message : 'unknown',
+    })
+  }
+
+  return legacySuccess({ received: true }, '回调接受成功', 202)
+}
